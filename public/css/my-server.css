@@ -1,0 +1,7 @@
+#server-list li{
+    border: 4px solid #EAEAEA;
+    list-style-type: none;
+    margin: 20px 0;
+    display: block;
+    padding: 20px;
+}

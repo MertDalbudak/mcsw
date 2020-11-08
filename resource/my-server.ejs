@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dalbudak: MC Server Manager</title>
+        <?- include('template/meta.ejs') -?>
+        <!-- JS HERE -->
+        <?- include('template/resource.ejs') -?>
+        <link rel="stylesheet" type="text/css" href="/css/my-server.css">
+        <!-- CSS HERE -->
+    </head>
+    <body>
+        <ul id="popup_container"></ul>
+        <?- include('template/header.ejs', {'user': user}) -?>
+        <div id="main">
+            <div class="container">
+                <h2>Meine Server</h2>
+                <ul id="server-list">
+                    <? for(var i = 0; i < user.assigned_server.length; i++){ ?>
+                    <li><?= user.assigned_server[i].name ?></li>
+                    <? } ?>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "name": "Server 1",
+        "bin": "minecraft"
+    },
+    {
+        "id": 2,
+        "name": "M I B",
+        "bin": "minecraft2"
+    }
+]
