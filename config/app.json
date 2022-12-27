@@ -1,0 +1,23 @@
+{
+    "database": {
+        "default": {
+            
+        }
+    },
+    "services": {
+
+    },
+    "emails": {
+        "default": {
+            "host": "localhost",
+            "port": 25,
+            "user": null,
+            "password": null,
+            "client": null
+        }
+    },
+    "languages": [
+        "root",
+        "de-de"
+    ]
+}

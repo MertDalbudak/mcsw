@@ -1,0 +1,11 @@
+<ul id="msg_container">
+    
+</ul>
+
+<script defer>
+document.addEventListener('DOMContentLoaded', function(){
+<? for(var i = 0; i < messages.length; i++) { ?>
+new Message('<?= messages[i]['type'] ?>', '<?= __(messages[i]['subject']) ?>', '<?= __(messages[i]['text']) ?>');
+<? } ?>
+});
+</script>

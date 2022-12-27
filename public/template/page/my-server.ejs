@@ -1,0 +1,62 @@
+<div class="container">
+    <h1>Meine Server</h1>
+    <div id="server-list-container">
+        <ul id="server-list">
+            <? for(var i = 0; i < user.assigned_server.length; i++){ ?>
+                <li>
+                    <table cellpadding="0" cellspacing="0" class="data_table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <? if(data.server_data.descriptionText == user.assigned_server[i].name) { ?>
+                            <tr>
+                                <td colspan="2">
+                                    <img src="<?= data.server_data.favicon ?>" alt="Server Image" height="64" width="64" class="crisp_edge" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td><i class="online_symbol"></i>Online</td>
+                            </tr>
+                            <tr>
+                                <td>Beschreibung</td>
+                                <td><?= data.server_data.descriptionText ?></td>
+                            </tr>
+                            <tr>
+                                <td>Version</td>
+                                <td><?= data.server_data.version ?></td>
+                            </tr>
+                            <tr>
+                                <td>Spieler</td>
+                                <td><?= data.server_data.onlinePlayers ?> / <?= data.server_data.maxPlayers ?></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button>Neustarten</button>
+                                </td>
+                                <td>
+                                    <button>Herunterfahren</button>
+                                </td>
+                            </tr>
+                            <? } else { ?>
+                            <tr>
+                                <td>Beschreibung</td>
+                                <td><?= user.assigned_server[i].name ?></td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td><i class="offline_symbol"></i>Offline</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button>Starten</button>
+                                </td>
+                            </tr>
+                            <? } ?>
+                        </tbody>
+                    </table>
+                </li>
+            <? } ?>
+        </ul>
+    </div>
+</div>

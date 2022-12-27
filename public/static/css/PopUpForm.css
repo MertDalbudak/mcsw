@@ -1,0 +1,84 @@
+.hidden {
+	display: none !important;
+} 
+
+ul#popup_container li {
+    height: 100%;
+    width: 100%;
+	top: 0;
+	left: 0;
+    display: block;
+    position: fixed;
+    z-index: 101;
+    background-color: rgba(0, 0, 0, .75);
+}
+
+ul#popup_container li div.popup {
+    min-width: max-content;
+    width: fit-content;
+    max-width: 80%;
+    height: fit-content;
+    max-height: 80%;
+    display: block;
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background-color: #FFF;
+    box-sizing: border-box;
+}
+
+ul#popup_container li .hide div.popup {
+    top: 0;
+}
+
+ul#popup_container li div div.popup_header {
+    min-width: calc(100% - 10px);
+    width: max-content;
+    position: relative;
+    padding: 0 15px;
+    line-height: 40px;
+    background-color: rgba(255, 255, 255, .9);
+    box-sizing: border-box;
+}
+
+ul#popup_container li div div.popup_body {
+    position: relative;
+}
+
+ul#popup_container li div div.popup_body div.popup_content {
+    min-width: calc(100% - 10px);
+    width: max-content;
+    height: fit-content;
+    overflow: auto;
+    padding: 0 15px 66px;
+    box-sizing: border-box;
+}
+
+ul#popup_container li div div.popup_body div.popup_dialog {
+    min-width: calc(100% - 10px);
+    width: max-content;
+    height: 66px;
+    position: absolute;
+    white-space: nowrap;
+    bottom: 0;
+    padding: 15px;
+    background-color: #FFF;
+    box-sizing: border-box;
+}
+
+.cancel {
+    background-color: transparent;
+    color: #E81123 !important;
+    box-shadow: none;
+}
+
+.cancel:focus {
+    background-color: transparent;
+    color: #E81123 !important;
+    text-decoration: underline;
+}

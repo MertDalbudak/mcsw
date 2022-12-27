@@ -1,0 +1,37 @@
+<?
+    moment.locale(langShort(language));
+?>
+<!DOCTYPE html>
+<html lang="<?= langShort(language) ?>">
+    <head>
+        <!-- Head -->
+        <?- include('default-head.ejs') ?>
+        <!-- Head -->
+
+        <!-- DEBUG -->
+        <?- include('debug-head.ejs') ?>
+        <!-- DEBUG -->
+    </head>
+    <body class="crisp_edge">
+        <ul id="popup_container"></ul>
+        <!-- Messages -->
+        <?- include('messages.ejs') ?>
+        <!-- Messages -->
+
+        <!-- Header -->
+        <?- include('header.ejs') ?>
+        <!-- Header -->
+
+        <div id="main">
+            <div id="content">
+                <!-- Content -->
+                <?- include('../page/' + content) ?>
+                <!-- Content -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <?- include('footer.ejs') ?>
+        <!-- Footer -->
+    </body>
+</html>

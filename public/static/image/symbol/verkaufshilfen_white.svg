@@ -1,0 +1,16 @@
+<svg id="Ebene_1" data-name="Ebene 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="Gruppe_378" data-name="Gruppe 378">
+    <g id="Gruppe_372" data-name="Gruppe 372">
+      <path id="Pfad_5136" data-name="Pfad 5136" class="cls-1" d="M13.53,8.25,10.09,1a.89.89,0,1,0-1.61.77l3.07,6.44Z"/>
+      <path id="Pfad_5137" data-name="Pfad 5137" class="cls-1" d="M7.55,1.12A.89.89,0,0,0,5.91,1L2.47,8.25h2L7.52,1.81A.92.92,0,0,0,7.55,1.12Z"/>
+      <path id="Pfad_5138" data-name="Pfad 5138" class="cls-1" d="M1.64,15.47H14.37L16,6.25H0Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,306 +1,374 @@
-const ngiN = require('../../lib/ngiN');
-const Session = require('./session.js');
-const ping = require('minecraft-server-util');
-const http = require('http')
-//const https = require('https')
+require('dotenv').config();
+process.env.ROOT = __dirname;
+
+const NODE_ENV = process.env.NODE_ENV;
+const DOMAIN = process.env.DOMAIN;
+const PORT = process.env.PORT;
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || 10);
+const COOKIE_SECRET = process.env.COOKIE_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_MAX_AGE = parseInt(process.env.SESSION_MAX_AGE) || false;
+
+
 const fs = require('fs');
-const mime = require('mime-types');
-//const url = require('url')
-//const qs = require('querystring');
-const domain = "dalbudak.de";
+const path = require('path');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const csrf = require('csurf');
+const fileUpload = require('express-fileupload');
 const bcrypt = require('bcrypt');
-const saltRounds = 12;
+const ejsRender = require('./lib/ejsRender');
+const RestApi = require('./lib/RestApi');
+const pushLog = require('./lib/pushLog');
+const Users = require('./src/Model/Users');
+const Invitations = require('./src/Model/Invitation')
+//const SendMail = require('./src/SendMail');
 
-const app = new ngiN(__dirname);
-app.routes = require(app.root + 'routes.js');
 
-/*const options = {
-    key: fs.readFileSync(app.root + '../../keys/privkey.pem'),
-    cert: fs.readFileSync(app.root + '../../keys/cert.pem')
-};*/
+const ROOT = process.env.ROOT;
+const ROUTES_PATH = ROOT + "/routes/";
+const STRINGS_PATH = ROOT + "/strings/";
+const ALLOWED_LANGUAGES = require('./config/app').languages;
+const SUPPORTED_LANGUAGES = fs.readdirSync(STRINGS_PATH).map(e => path.parse(e).name);
+const FILE_NAME_LENGTH = 32;
+const COOKIE_OPTIONS = {
+    'path': "/",
+    'signed': true,
+    'httpOnly': true,
+    'secure': NODE_ENV == "production",
+    'sameSite': "strict"
+};
+const SESSION_OPTIONS = {
+    'name': "usid",
+    'resave': false,
+    'saveUninitialized': false,
+    'secret': SESSION_SECRET,
+    'cookie': {
+        'path': "/",
+        'maxAge': SESSION_MAX_AGE,
+        'httpOnly': true, 
+        'secure': NODE_ENV == "production",
+        'sameSite': "strict"
+    },
+    'store': require('./src/Model/Session')(session.Store),
+    'proxy': true
+};
+const CSRF_OPTIONS = { cookie: true };
 
-app.dictionary = {};
-let languages = app.getFileNamesOfDirectory(app.resource_path + "language");
-for(let i = 0; i < languages.length; i++){
-    app.dictionary[app.getBaseName(languages[i], ".json")] = app.getFile(app.resource_path + "language/" + languages[i]);
+const app = express();
+
+// TRUST PROXY WHEN PRODUCTION
+if (NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
 }
 
-function parseCookies(rc) {
-    var list = {};
-    rc && rc.split(';').forEach(function( cookie ) {
-        let parts = cookie.split('=');
-        let value = decodeURI(parts.join('='));
-        value = value.substring(value.indexOf("=") + 1);
+/**
+ * Gets the first accepted language
+ * @param {string} remote_lang Language
+ * @return {Object}
+ * @public
+ */
+function acceptedLanguage(remote_lang){
+    remote_lang = remote_lang.toLowerCase();
+    const _default = ALLOWED_LANGUAGES.find(allowed => SUPPORTED_LANGUAGES.find(available => available.toLowerCase() == allowed.toLowerCase()));
+    try{
+        remote_lang = remote_lang.split(',').map(s => s.substr(0, 2));
+        for(let i = 0; i < remote_lang.length; i++){
+            const lang = ALLOWED_LANGUAGES.find(e => e.substr(0, 2).toLowerCase() == remote_lang[i]);
+            if(lang != undefined)
+                return lang;
+        }
+        pushLog(`Remote's accepted language is not allowed or not supported.`, 'Remote', 'request');
+    }catch {
+        pushLog(`Cannot understand remote's accepted language.`, 'Remote', 'request');
+    }
+    pushLog(`Setting ${_default} as language.`, 'Remote', 'request');
+    return _default;
+}
 
-        // IF SESSION
-        if(value.indexOf('ngiNSession:') > -1){
-            let session = Session.find(value.replace('ngiNSession:', ""));
-            if(session != undefined)
-                value = Session.find(value.replace('ngiNSession:', "")).value;
+app.use(express.static(ROOT + '/public/static'));
+
+app.use(express.urlencoded({
+    extended: true
+}));
+
+// USE SESSION MIDDLEWARE
+app.use(session(SESSION_OPTIONS));
+// USE JSON PARSE MIDDLEWARE
+app.use(express.json());
+// USE COOKIE-PARSER MIDDLEWARE
+app.use(cookieParser(COOKIE_SECRET));
+// USE CSRF MIDDLEWARE
+app.use(csrf(CSRF_OPTIONS));
+app.use(function(err, req, res, next) {
+    console.error(err);
+    if (err.code !== 'EBADCSRFTOKEN') return next(err)
+
+    // handle CSRF token errors here
+    res.sendStatus(403);
+    res.end();
+});
+
+/////////// CUSTOM MIDDLEWARE ///////////
+
+app.use(async function(req, res, next){
+    //////////// SET LANGUAGE ////////////
+
+    req.language = req.signedCookies['lang'] || acceptedLanguage(req.headers['accept-language'] || "");
+
+    //////////// SET LANGUAGE ////////////
+
+
+    ////////////// MESSAGES //////////////
+
+    req.messages = [];
+    if(req.signedCookies['msgs'] != undefined){
+        try{
+            req.messages = JSON.parse(req.signedCookies['msgs']);
+            if(Array.isArray(req.messages) == false)
+                pushLog("Cannot understand messages", "Parse Messages")
+        }
+        catch(error){
+            pushLog(error);
+            req.messages = [];
+        }
+    }
+    /**
+     * Create a new message which will be shown when a new page will be rendered
+     * @param {'success'|'warn'|'error'} type Message type
+     * @param {string} subject Subject
+     * @param {string} text Detailed message
+     * @returns {void} Void, returns undefined
+     * @overwrite
+    */
+    res.newMessage = function (type, subject, text = ""){
+        req.messages.push({'type': type, 'subject': subject, 'text': text});
+        // maxAge 5min: 5(min) * 60(sec) * 1000(millisec.) = 300000
+        res.cookie('msgs', JSON.stringify(req.messages), {...COOKIE_OPTIONS, 'maxAge': 300000});
+    };
+
+    ////////////// MESSAGES //////////////
+
+    /////// VALIDATE LOGIN STATUS ///////
+    req.user = null;
+    req.check_user_status = new Promise((resolve, reject)=> {
+        if(req.session != undefined){
+            if(req.session.username != undefined){
+                req.user = Users.get(req.session.username);
+                resolve();
+            }
             else
-                return;
-        }
-        list[parts.shift().trim()] = value;
-    });
-
-    return list;
-}
-
-function error404(req, res){
-    let user = req.cookies['user'];
-    let users = app.getFile(app.root + 'data/user.json');
-    user = users[user];
-    res.statusCode = 404;
-    app.ejsRenderFile(app.resource_path + '404.ejs', {'user': user}, function(err, data){
-        if(err == null){
-            res.end(data);
-        }
-    });
-}
-
-//const server = https.createServer(options, function(req, res){
-const server = http.createServer(function(req, res){
-    let path_match = false;
-    let path = req.url.match('^[^?]*')[0].replace(/\/+$/,'') || "/";  // GET PATH OF REQEST
-    console.log(path);
-    let body = '';
-    if(req.method == "POST" || req.method == "PUT"){    // GET BODY DATA IF REQUEST METHOD IS POST OR PUT
-        req.on('data', function (data) {
-            body += data;
-        });
-    }
-    req.cookies = parseCookies(req.headers.cookie); // PARSE COOKIES
-    app.pushLog(req.url + ' by: ' + req.connection.remoteAddress, 'Requested URL'); // LOG REQUEST
-
-    // REQUEST HANDLER
-    if(/^\/css|\/js/.test(path)){
-        path_match = true;
-        let css_file = app.getFile(app.public_path + req.url, true);
-        if(css_file !== false){
-            if(/^\/css/.test(req.url))
-                res.setHeader('Content-Type', 'text/css')
-            if(/^\/js/.test(req.url))
-                res.setHeader('Content-Type', 'application/js')
-            res.end(css_file);
-        }
-        else{
-            res.statusCode = 404;
-            res.end();
-        }
-    }
-    if(path == '/favicon.ico'){
-        path_match = true;
-        fs.createReadStream(app.resource_path + 'icon/favicon.ico').pipe(res);
-    }
-    if(path.indexOf('/img/') == 0){
-        path_match = true;
-        fs.exists(app.public_path + req.url, (exists)=>{
-            if(exists){
-                res.setHeader('Content-Type', mime.contentType(app.getFileExtension(req.url)));
-                fs.createReadStream(app.public_path + req.url).pipe(res);
-            }
-            else {
-                res.statusCode = 404;
-                res.end("404");
-            }
-        });
-    }
-    if(path.indexOf('/font/') == 0){
-        path_match = true;
-        fs.exists(app.public_path + req.url, (exists)=>{
-            if(exists){
-                res.setHeader('Content-Type', mime.contentType(app.getFileExtension(req.url)));
-                fs.createReadStream(app.public_path + req.url).pipe(res);
-            }
-            else {
-                res.statusCode = 404;
-                res.end("404");
-            }
-        });
-    }
-    if(path == '/'){
-        path_match = true;
-        let user = req.cookies['user'];
-        let server_data;
-        if(user != undefined){
-            let users = app.getFile(app.root + 'data/user.json');
-            user = users[user];
-        }
-        else{
-            res.setHeader('Set-Cookie', "user=;max-age=-1");
-        }
-        ping(domain, 25565, (error, sd) => {
-            if (error == null){
-                server_data = sd;
-            }
-            app.ejsRenderFile(app.resource_path + 'index.ejs', {'user': user, 'server_data': server_data}, function(err, data){
-                if(err == null){
-                    res.end(data);
-                }
-            });
-        });
-    }
-    if(path == '/my-server'){
-        path_match = true;
-        let user = req.cookies['user'];
-        if(user != undefined){
-            let users = JSON.parse(app.getFile(app.root + 'data/user.json', true));
-            let servers = JSON.parse(app.getFile(app.root + 'data/server.json', true));
-            user = users[user];
-            user.assigned_server = servers.filter(element => user.assigned_server.find(e => e == element.id));
-            app.ejsRenderFile(app.resource_path + 'my-server.ejs', {'user': user}, function(err, data){
-                if(err == null){
-                    res.end(data);
-                }
-            });
-        }
-        else{
-            res.setHeader('Set-Cookie', "user=;max-age=-1");
-            res.writeHead(302, {
-                'Set-Cookie': "user=;max-age=0",
-                'Location': '/'
-            });
-            res.end();
-        }
-    }
-    if(req.url == '/help'){
-        path_match = true;
-        let user = req.cookies['user'];
-        if(user != undefined){
-            let users = app.getFile(app.root + 'data/user.json');
-            user = users[user];
+                reject();
         }
         else
-            user = undefined;
-        app.ejsRenderFile(app.resource_path + 'help.ejs', {'user': user}, function(err, data){
-            if(err == null){
-                res.end(data);
-            }
-        });
-    }
-    if(req.url == '/login'){
-        path_match = true;
-        if(req.method == 'POST'){
-            req.on('end', function () {
-                let data = JSON.parse(body);
-                let response = {
-                    'error': null,
-                    'data': null
-                };
-                let users = app.getFile(app.root + 'data/user.json');
-                let user_id = users.findIndex(element => (element['name'] == data.user));
-                if(user_id == -1){
-                    response['error'] = "Benutzername oder Passwort falsch";
-                }
-                else{
-                    let hash = users[user_id].hash;
-                    bcrypt.compare(data.password, hash, function(err, result) {
-                        if(result){
-                            response['data'] = true;
-                            res.setHeader('Set-Cookie', new Session("user", user_id, (24 * 60 * 60)).cookieString);
-                        }
-                        else {
-                            response['error'] = "Benutzername oder Passwort falsch";
-                        }
-                        res.end(JSON.stringify(response));
-                    });
-                }
-                if(response['error'] != null || response['data'] != null){
-                    res.end(JSON.stringify(response));
-                }
-            });
-        }
-        else{
-            res.statusCode = 403;
-            res.end('METHOD NOT ALLOWED');
-        }
-    }
-    if(req.url == '/logout'){
-        path_match = true;
-        if(req.cookies['user'] != undefined){   // UNSET COOKIE
-            let session = Session.findByNameValue('user', req.cookies['user']);
-            if(session != undefined)
-                session.remove();
-        }
-        res.writeHead(302, {
-            'Set-Cookie': "user=;max-age=0",
-            'Location': '/'
-        });
-        res.end();
-    }
-    if(req.url == '/register'){
-        path_match = true;
-        if(req.method == 'POST'){
-            let body = '';
-            req.on('data', function (data) {
-                body += data;
-            });
-            req.on('end', function () {
-                let data = JSON.parse(body);
-                let response = {
-                    'error': null,
-                    'data': null
-                };
-                let users = app.getFile(app.root + 'data/user.json');
-                if(users.find(element => (element['name'] == data.user))){
-                    // AN USER WITH THE SAME USERNAME ALREADY EXISTS
-                    app.pushLog('Register failed, user: ' + data.user + ' already registered', "Register User");
-                    response['error'] = "Registrierung fehlgeschlagen. Benutzer existiert bereits";
-                }
-                else {
-                    let invitations = app.getFile(app.root + 'data/invitation.json');
-                    invitation = invitations.find(element => (element['user'] == data.user && element['hash'] == data.invitation_code));
-                    if(invitation == undefined){
-                        // NO INVITATION FOUND
-                        app.pushLog('Register failed, no invitation found for user: ' + data.user, "Register User");
-                        response['error'] = 'Registrierung fehlgeschlagen. Kein Einladungscode gefunden für Benutzer: ' + data.user;
-                    }
-                    else {
-                        if(data.password.length < 6){
-                            // PASSWORD ISN'T LONG ENOUGH
-                            app.pushLog('Register failed, password is too short: ' + data.user, "Register User");
-                            response['error'] = 'Registrierung fehlgeschlagen. Passwort zu kurz';
-                        }
-                        else{
-                            if(data.password !== data.password_repeat){
-                                // PASSWORDS AREN'T THE SAME
-                                app.pushLog('Register failed, password is not the same: ' + data.user, "Register User");
-                                response['error'] = 'Registrierung fehlgeschlagen. Passwörter stimmen nicht überein';
-                            }
-                            else {
-                                bcrypt.hash(data.password, saltRounds, function(err, hash) {
-                                    // Store hash in your password DB.
-                                    let users = app.getFile(app.root + 'data/user.json');
-                                    users.push({'name': data.user, 'hash': hash, 'assigned_server': invitation.assigned_server, 'create_date': Date.now()});
-                                    if(app.setFile(app.root + 'data/user.json', JSON.stringify(users), 'utf-8', true))
-                                        response['data'] = "Registrierung erfolgreich";
-                                    else 
-                                        response['error'] = "Registrierung fehlgeschlagen. Irgendwas ist schief gelaufen";
-                                    res.end(JSON.stringify(response));
-                                });
-                            }
-                        }
-                    }
-                    
-                }
-                if(response['error'] != null || response['data'] != null){
-                    res.end(JSON.stringify(response));
-                }
-            });
-        }
-        else{
-            res.statusCode = 403;
-            res.end('METHOD NOT ALLOWED');
-        }
-    }
-    if(path_match == false){
-        error404(req, res);
-    }
-    const error_timeout = setTimeout(()=> { // IF REQUEST DOES TAKE MORE THAN 10 SECONDS RESPONSE, TIMEOUT WITH ERROR 404
-        error404(req, res);
-    }, 10000);
-    res.on('close', function(){
-        clearTimeout(error_timeout);
+            reject();
     });
-}).listen(8080);
-//}).listen(443);
+    /////// VALIDATE LOGIN STATUS ///////
+    
+    next();
+});
+
+
+/////////// UPLOAD HANDLER ///////////
+
+app.use(fileUpload({
+    'useTempFiles' : true,
+    'tempFileDir': ROOT + "/temp/upload/",
+    'limits': { 
+        'fileSize': 50 * 1024 * 1024    // 50Mbyte
+    },
+    'preserveExtension': true,
+    'abortOnLimit': true
+}));
+
+/////////// UPLOAD HANDLER ///////////
+
+
+///////////// EJS RENDER /////////////
+
+app.use(ejsRender({
+    'template_path': ROOT + "/public/template/layout", 
+    'dictionary_path': ROOT + "/strings", 
+    'default_dict': "root"
+}));
+
+///////////// EJS RENDER /////////////
+
+
+/////////////// ROUTER ///////////////
+
+app.all('/*', async (req, res, next) => {
+    req.remoteAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    req.remoteAddressAnonym = req.remoteAddress.substring(0, req.remoteAddress.lastIndexOf('.'));
+    pushLog(`${req.method}: ${req.url} from: ${req.remoteAddress}`, "Incoming", "request");
+
+    req.ejs_data = {};
+    req.ejs_options = {};
+
+    req.check_user_status.then(() => {
+        // RULES FOR LOGGED IN USERS HERE
+        pushLog(`Logged in. User: ${req.user.name}, Session id: ${req.session.id}`, "User Status", 'request');
+    }, ()=> {
+        // RULES FOR NOT LOGGED IN USERS HERE
+        pushLog("Not logged in", "User Status", 'request');
+    }).finally(()=>{
+        next();
+    });
+});
+
+app.get('/lang/*', function(req, res){
+    let lang = req.params[0];
+    if(lang){
+        lang = ALLOWED_LANGUAGES.find(e => e == lang.replace('/', '')) || ALLOWED_LANGUAGES[0];
+        res.cookie('lang', lang, COOKIE_OPTIONS);
+        res.redirect(302, req.query['redirect'] || '/');
+    }
+    else
+        res.redirect('/');
+});
+
+app.post('/signin', async function(req, res) {
+    // CHECK IF ALREADY SIGNED IN
+    if(req.user != null){
+        res.redirect(302, '/');
+        return;
+    }
+    // CHECK IF PASSWORD IS CORRECT
+    let user = Users.get(req.body.user);
+    if(user != undefined){
+        console.log(req.body);
+        if(req.body.user && req.body.password){
+            const check_password = await bcrypt.compare(req.body.password.toString(), user['hash']);
+            if(check_password){
+                // TODO SET COOKIE
+                req.session.username = req.body.user;
+                req.session.ip_address = req.remoteAddressAnonym;
+                req.session.user_agent = req.headers['user-agent'];
+                /* EXPRESS FRAMEWORK NOT ALLOWING THIS OR UNEXPECTED BEHAVIOR
+                req.session.save((error)=>{
+                    console.log(error);
+                    if(error == null)
+                        res.newMessage("success", "Angemeldet");
+                    else
+                        res.newMessage("error", "signIn_loginFailedSummary", "signInFailedStore_message");
+                    res.redirect(302, '/');
+                });
+                await req.session.save().then(()=> {
+                    res.newMessage("success", "Angemeldet")
+                }, (error) => {
+                    res.newMessage("error", "signIn_loginFailedSummary", "signInFailedStore_message");
+                });
+                */
+                pushLog(`User ${req.body.user} successfuly logged in`, "SignIn", 'request');
+
+                res.json({
+                    error: null,
+                    data: "Login successful"
+                });
+            }
+            else{
+                pushLog(`Wrong password for user: ${req.body.user}`, "SignIn", 'request');
+                res.json({
+                    error: "Wrong username or password",
+                    data: null
+                });
+                // PASSWORD WRONG
+            }
+        }
+        else{
+            pushLog(`Either user or password was empty`, "SignIn", 'request');
+            res.json({
+                error: "Mandatory field cannot be empty",
+                data: null
+            });
+        }
+    }
+    else{
+        pushLog(`No user with username: ${req.body.user}`, "SignIn", 'request');
+        res.json({
+            error: "Wrong username or password",
+            data: null
+        });
+        //res.newMessage("error", "signIn_loginFailedMessage");
+        //res.redirect(302, '/signin');
+        // PASSWORD WRONG
+        // PUSH TO FAILED LOGINS
+    }
+});
+
+
+
+app.post('/signup', function(req, res) {
+    // CHECK IF ALREADY SIGNED IN
+    if(req.user != null){
+        res.redirect(302, '/');
+        return;
+    }
+    if(Users.get(req.body.user) == null){
+        let invitations = Invitations.getAll()
+        let invitation = invitations.findIndex(e => (e.user == req.body.user && e.hash == req.body.invitation_code));
+        if(invitation != -1){
+            const salt = bcrypt.genSaltSync(SALT_ROUNDS);
+            const hash = bcrypt.hashSync(req.body.password, salt);
+            Users.create(req.body.user, hash, invitations[invitation].assigned_server).then(function(sql_res){
+                pushLog(`Users successfuly created`, "SignUp", 'sql');
+                res.json({
+                    error: null,
+                    data: "Benutzer erfolgreich angelegt"
+                });
+                //res.redirect(302, '/');
+            }).catch(function(err){
+            console.error(err);
+            pushLog(err, 'Insert new User', 'sql');
+                //res.newMessage('error', "error_pageTitle")
+                res.json({
+                    error: 'Bei der Erstellung eines neuen Nutzers ist ein Fehler aufgetreten',
+                    data: null
+                });
+            });
+            /*
+            const requestBody = {
+    
+            };
+            const newContact = new RestApi('EC', 'setContact');
+            newContact.req(JSON.stringify(requestBody)).then(function(data){
+                const salt = bcrypt.genSaltSync(SALT_ROUNDS);
+                const hash = bcrypt.hashSync(req.body.password, salt);
+                Users.create(...)
+            }, function(error){
+                pushLog(error, "Create Contact");
+                res.redirect('?success_msg[0]=Registrierung%20fehlgeschlagen');
+            }).catch(function(error){
+                pushLog(error);
+                res.redirect('?success_msg[0]=Registrierung%20fehlgeschlagen');
+            });*/
+        }
+        else{
+            //res.newMessage('error', "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.")
+            res.json({
+                error: "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.",
+                data: null
+            });
+        }
+    }
+    else{
+        //res.newMessage('error', "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.")
+        res.json({
+            error: "Der Nutzer: " + req.body.user + " existiert bereits.",
+            data: null
+        });
+    }
+    res.end();
+});
+
+// LOAD ALL ROUTERS
+fs.readdirSync(ROUTES_PATH).forEach(function(filename) {
+    const route = filename == "root.js" ? '/' : `/${path.parse(filename).name}`;
+    app.use(route, require(ROUTES_PATH + filename));
+},);
+
+/////////////// ROUTER ///////////////
+
+
+app.listen(PORT, () => pushLog('Application running on port ' + PORT, "Server start"));

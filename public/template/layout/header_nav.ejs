@@ -1,0 +1,17 @@
+<ul id="header-nav">
+    <? if(user){ ?>
+    <li class="menu-btn">
+        <a class="burger-btn" onclick="toggleMenu()"><img src="/image/menu.svg" height="32"></a>
+    </li>
+    <? } else { ?>
+    <li class="mobile-menu-btn">
+        <a class="burger-btn" onclick="toggleMenu()"><img src="/image/menu.svg" height="32"></a>
+    </li>
+    <li>
+        <button class="btn" onclick="register_form.show()">Registrieren</button>
+    </li>
+    <li>
+        <button class="btn" onclick="login_form.show()">Anmelden</button>
+    </li>
+    <? } ?>
+</ul>
