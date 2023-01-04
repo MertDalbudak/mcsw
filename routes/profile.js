@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const ping = require('minecraft-server-util');
 const Users = require('../src/Model/Users');
+const Servers = require('../src/Model/Server');
 const Invitations = require('../src/Model/Invitation');
 const pushLog = require('../lib/pushLog');
 
@@ -34,6 +35,93 @@ router.get('/my-server', function(req, res) {
             res.end();
         });
     });
+});
+
+router.post('/my-server/:id/start', function(req, res) {
+    const server = req.user.assigned_server.find(s => s.id == req.params.id);
+    if(server){
+        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
+            if (error == null){
+                if(server.name == sd.descriptionText){
+                    res.json({
+                        'error': "Server is already running",
+                        'message': "Failed"
+                    });
+                }
+                else{
+                    if(sd.onlinePlayers == 0){
+                        res.json({
+                            'error': null,
+                            'message': "Another server is currently running. It will stopping shortly. Your server will soon start. Be patient."
+                        });
+                    }
+                    else{
+                        res.json({
+                            'error': "Another server currently running and people are still playing. Check soon again.",
+                            'message': "Failed"
+                        });
+                    }
+                }
+            }
+            else{
+                res.json({
+                    'error': "An error occured, try again later",
+                    'message': "Failed"
+                });
+            }
+        });
+    }
+    else{
+        res.json({
+            'error': "You are not allowed to start this server",
+            'message': "Failed"
+        });
+    }
+    res.end();
+});
+
+router.post('/my-server/:id/stop', function(req, res) {
+    const server = req.user.assigned_server.find(s => s.id == req.params.id);
+    if(server){
+        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
+            if (error == null){
+                if(server.name == sd.descriptionText){
+                    if(sd.onlinePlayers == 0){
+                        // REQUEST SERVER STOP
+
+                        res.json({
+                            'error': null,
+                            'message': "Stopping requested"
+                        });
+                    }
+                    else{
+                        res.json({
+                            'error': "Server is not empty",
+                            'message': "Failed"
+                        });
+                    }
+                }
+                else{
+                    res.json({
+                        'error': "Another server is currently running",
+                        'message': "Failed"
+                    });
+                }
+            }
+            else{
+                res.json({
+                    'error': "An error occured, try again later",
+                    'message': "Failed"
+                });
+            }
+        });
+    }
+    else{
+        res.json({
+            'error': "You are not allowed to stop this server",
+            'message': "Failed"
+        });
+    }
 });
 
 router.get('/invites', function(req, res){

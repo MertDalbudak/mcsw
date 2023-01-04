@@ -10,11 +10,11 @@ const file_path = process.env.ROOT + '/data/user.json';
  * @return {{}} User
  * @public
  */
-Users.get = (name) => {
-    let users = require(file_path);
+Users.get = async (name) => {
+    let users = await Users.getAll();
     let user = users.find(user => user.name == name) || null;
     if(user != null){
-        user.assigned_server = user.assigned_server.map(server_name => typeof server_name == "string" ? Servers.get(server_name) : server_name);
+        user.assigned_server = await Promise.all(user.assigned_server.map(async server_id => await Servers.get(server_id) || server_id));
     }
     return user;
 };
@@ -24,7 +24,7 @@ Users.get = (name) => {
  * @return {{}} Users
  * @public
  */
-Users.getAll = () => require(file_path);
+Users.getAll = async() => JSON.parse(await fs.readFile(file_path));
 
 /**
  * Creates a new user
@@ -35,7 +35,7 @@ Users.getAll = () => require(file_path);
  * @public
  */
 Users.create = async (name, hash, assigned_server = []) => {
-    let users = require(file_path);
+    let users = await Users.getAll();
     let user = {'name': name, 'hash': hash, 'assigned_server': assigned_server, 'create_date': Date.now()};
     users.push(user);
     // TODO add to whitelist of servers
@@ -50,7 +50,7 @@ Users.create = async (name, hash, assigned_server = []) => {
  * @public
  */
 Users.update = async (name, data) => {
-    let users = require(file_path);
+    let users = await Users.getAll();
     let user = {'name': name};
 
     let options = ['hash', 'assigned_server'];

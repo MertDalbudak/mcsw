@@ -1,1 +1,1 @@
-[{"name":"hatrez","hash":"$2b$12$G3A3tHUJ8o5fNGORlbFzHeszGEkpjvhvKPaE7koEStO5Cv6FMpS9q","assigned_server":["Zockerecke","M I B"],"create_date":1591023476099},{"name":"xMeTubex","hash":"$2b$12$MHTheJklFR9gz11suhBOCORZykIMuIQ21BV/cmXbPErVRKnlFmJoG","assigned_server":["Zockerecke"],"create_date":1610060387710}]
+[{"name":"hatrez","hash":"$2b$12$G3A3tHUJ8o5fNGORlbFzHeszGEkpjvhvKPaE7koEStO5Cv6FMpS9q","assigned_server":[0, 1],"create_date":1591023476099}]

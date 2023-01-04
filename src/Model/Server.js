@@ -4,13 +4,24 @@ const Servers = {};
 const file_path = process.env.ROOT + '/data/server.json';
 
 /**
- * Gets server by it's  unique_id
+ * Gets server by it's unique_id
+ * @param {Number} id
+ * @return {{}} Server
+ * @public
+ */
+Servers.get = async (id) => {
+    let servers = await Servers.getAll();
+    return servers.find(server => server.id == id) || null;
+};
+
+/**
+ * Gets server by it's unique_id
  * @param {Number|String} name
  * @return {{}} Server
  * @public
  */
- Servers.get = (name) => {
-    let servers = Servers.getAll();
+Servers.getByName = async (name) => {
+    let servers = await Servers.getAll();
     return servers.find(server => server.name == name) || null;
 };
 
@@ -19,7 +30,7 @@ const file_path = process.env.ROOT + '/data/server.json';
  * @return {{}} Servers
  * @public
  */
-Servers.getAll = () => require(file_path);
+Servers.getAll = async () => JSON.parse(await fs.readFile(file_path));
 
 /**
  * Creates a new server
@@ -29,7 +40,7 @@ Servers.getAll = () => require(file_path);
  * @public
  */
 Servers.create = async (name, bin) => {
-    let servers = Servers.getAll();
+    let servers = await Servers.getAll();
     let server = {'name': name, 'bin': bin};
     servers.push(server);
     return fs.writeFile(file_path, JSON.stringify(servers), {'encoding': 'utf-8'});
@@ -43,7 +54,7 @@ Servers.create = async (name, bin) => {
  * @public
  */
 Servers.update = async (name, data) => {
-    let servers = Servers.getAll();
+    let servers = await Servers.getAll();
     let server = {'name': name};
 
     let options = ['bin'];

@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const crypto = require('crypto');
+const Servers = require(process.env.ROOT + '/src/Model/Server')
 const Invitations = {};
 const file_path = process.env.ROOT + '/data/invitation.json';
 
@@ -9,8 +10,8 @@ const file_path = process.env.ROOT + '/data/invitation.json';
  * @return {{}} User
  * @public
  */
-Invitations.get = (id) => {
-    let invitations = Invitations.getAll();
+Invitations.get = async (id) => {
+    let invitations = await Invitations.getAll();
     return invitations.find(invitation => invitation.id == id);
 };
 
@@ -20,8 +21,8 @@ Invitations.get = (id) => {
  * @return {[{}]} Users
  * @public
  */
- Invitations.getByUser = (user) => {
-    let invitations = Invitations.getAll();
+ Invitations.getByUser = async (user) => {
+    let invitations = await Invitations.getAll();
     return invitations.filter(invitation => invitation.user == user);
 };
 
@@ -31,8 +32,8 @@ Invitations.get = (id) => {
  * @return {[{}]} Users
  * @public
  */
- Invitations.getByInvited = (invited_by) => {
-    let invitations = Invitations.getAll();
+ Invitations.getByInvited = async (invited_by) => {
+    let invitations = await Invitations.getAll();
     return invitations.filter(invitation => invitation.invited_by == invited_by);
 };
 
@@ -42,9 +43,8 @@ Invitations.get = (id) => {
  * @return {[{}]|{}} Invitations
  * @public
  */
-Invitations.getAll = function(everything = false){
-    delete require.cache[file_path]
-    let document = require(file_path);
+Invitations.getAll = async (everything = false) =>{
+    let document = JSON.parse(await fs.readFile(file_path));
     return everything ? document : document.list;
 }
 
@@ -63,12 +63,22 @@ Invitations.getAll = function(everything = false){
  * @public
  */
 Invitations.create = async (user, invited_by, assigned_server = []) => {
-    let invitations = Invitations.getAll(true);
-    let hash = crypto.randomBytes(16).toString('hex');
-    let invitation = {'id': invitations.auto_increment++, 'user': user, 'invited_by': invited_by, 'hash': hash, 'assigned_server': assigned_server, 'invitation_date': Date.now()};
-    invitations.list.push(invitation);
-    await fs.writeFile(file_path, JSON.stringify(invitations), {'encoding': 'utf-8'});
-    return invitations.auto_increment - 1;
+    let assigned_server_exists = true;
+    assigned_server.forEach(async (server)=>{
+        if(await Servers.get(server.id) == null)
+            assigned_server_exists = false;
+    });
+    if(assigned_server_exists){
+        let invitations = await Invitations.getAll(true);
+        let hash = crypto.randomBytes(16).toString('hex');
+        let invitation = {'id': invitations.auto_increment++, 'user': user, 'invited_by': invited_by, 'hash': hash, 'assigned_server': assigned_server, 'invitation_date': Date.now()};
+        invitations.list.push(invitation);
+        await fs.writeFile(file_path, JSON.stringify(invitations), {'encoding': 'utf-8'});
+        return invitations.auto_increment - 1;
+    }
+    else{
+        throw new Error('Assigned Server does not exists');
+    }
 };
 
 /**
@@ -79,7 +89,7 @@ Invitations.create = async (user, invited_by, assigned_server = []) => {
  * @public
  */
 Invitations.update = async (id, data, new_hash = false) => {
-    let invitations = Invitations.getAll(true);
+    let invitations = await Invitations.getAll(true);
     let options = ['invited_by', 'assigned_server'];
     for(let key in data){
         if(options.find(option => option == key) == undefined){
@@ -101,8 +111,8 @@ Invitations.update = async (id, data, new_hash = false) => {
  * @return {void}
  * @public
  */
- Invitations.remove = (id) => {
-    let invitations = Invitations.getAll(true);
+ Invitations.remove = async (id) => {
+    let invitations = await Invitations.getAll(true);
     invitations.list = invitations.list.filter(invitation => invitation.id != id);
     return fs.writeFile(file_path, JSON.stringify(invitations), {'encoding': 'utf-8'});
 };

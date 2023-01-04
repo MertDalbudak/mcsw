@@ -152,10 +152,10 @@ app.use(async function(req, res, next){
 
     /////// VALIDATE LOGIN STATUS ///////
     req.user = null;
-    req.check_user_status = new Promise((resolve, reject)=> {
+    req.check_user_status = new Promise(async (resolve, reject)=> {
         if(req.session != undefined){
             if(req.session.username != undefined){
-                req.user = Users.get(req.session.username);
+                req.user = await Users.get(req.session.username);
                 resolve();
             }
             else
@@ -235,7 +235,7 @@ app.post('/signin', async function(req, res) {
         return;
     }
     // CHECK IF PASSWORD IS CORRECT
-    let user = Users.get(req.body.user);
+    let user = await Users.get(req.body.user);
     if(user != undefined){
         console.log(req.body);
         if(req.body.user && req.body.password){
@@ -299,14 +299,14 @@ app.post('/signin', async function(req, res) {
 
 
 
-app.post('/signup', function(req, res) {
+app.post('/signup', async function(req, res) {
     // CHECK IF ALREADY SIGNED IN
     if(req.user != null){
         res.redirect(302, '/');
         return;
     }
-    if(Users.get(req.body.user) == null){
-        let invitations = Invitations.getAll()
+    if(await Users.get(req.body.user) == null){
+        let invitations = await Invitations.getAll();
         let invitation = invitations.findIndex(e => (e.user == req.body.user && e.hash == req.body.invitation_code));
         if(invitation != -1){
             const salt = bcrypt.genSaltSync(SALT_ROUNDS);

@@ -69,7 +69,7 @@ function invite(err, data){
 function removeInvite(id){
     if(isNaN(id)){
         console.error('ID cannot be NaN');
-        return false;
+        throw new Error('ID cannot be NaN');
     }
     fetch('/profile/invites/delete/' + id, {
         'method': "DELETE",
@@ -96,9 +96,40 @@ function removeInvite(id){
     });
 }
 
+function stopServer(id){
+    if(isNaN(id)){
+        console.error('ID cannot be NaN');
+        throw new Error('ID cannot be NaN');
+    }
+    new PopUpForm("Stopping the server", [{'title': "Are you sure you want to stop this server?\nOnly an empty server can be stopped."}], ()=>{
+        // TRY STOPPING THE SERVER
+        fetch(`/profile/my-server/${id}/stop`, {
+            'method': "POST",
+            'credentials': 'same-origin',
+            'headers': {
+                'Content-Type': "application/json; charset=utf-8",
+                'CSRF-Token': token
+            },
+            'Accept': 'application/json'
+        }).then(async (response)=>{
+            response = await response.json();
+            console.log(response);
+            if(response.error == null){
+                new Message('success', response.data.message);
+
+            }
+            else{
+                new Message('error', response.error);
+                console.error(response.error);
+            }
+        }, (error)=>{
+            new Message('error', error);
+        })
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function(){
-    invitation_form = new PopUpForm("Einen Freund einladen", invitation_form_schema, invite);
+    invitation_form = new PopUpForm("Invite an friend", invitation_form_schema, invite);
     invitation_form.on('beforeReady', function(){
         this.hide();
     });
