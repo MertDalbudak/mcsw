@@ -64,10 +64,16 @@ Invitations.getAll = async (everything = false) =>{
  */
 Invitations.create = async (user, invited_by, assigned_server = []) => {
     let assigned_server_exists = true;
-    assigned_server.forEach(async (server)=>{
-        if(await Servers.get(server.id) == null)
-            assigned_server_exists = false;
-    });
+    for(let i = 0; i < assigned_server.length; i++){
+        if(isNaN(assigned_server[i])){
+            throw new Error(`Assigned Server identifier needs to be a Number. Expected a Number, ${typeof assigned_server[i]} given.`);
+        }
+        else{
+            assigned_server[i] = parseInt(assigned_server[i]);
+            if(await Servers.get(assigned_server[i]) == null)
+                assigned_server_exists = false;
+        }
+    }
     if(assigned_server_exists){
         let invitations = await Invitations.getAll(true);
         let hash = crypto.randomBytes(16).toString('hex');

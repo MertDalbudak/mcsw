@@ -1,5 +1,8 @@
 <div class="container">
-    <?- debug(data.invites) ?>
+    <h1><?= __('Invitations') ?></h1>
+    <? if(data.invites.length == 0){ ?>
+        <h3><?= __('No invitations set') ?></h3>
+    <? } ?>
     <ul id="invitations">
         <? for(let i = 0; i < data.invites.length; i++){ ?>
             <li data-id="<?= data.invites[i].id ?>">
@@ -9,11 +12,11 @@
                     <tbody>
                         <tr>
                             <td>Benutzername</td>
-                            <td><?= data.invites[i].user ?></td>
+                            <td class="_select"><?= data.invites[i].user ?></td>
                         </tr>
                         <tr>
                             <td>Einladungstoken</td>
-                            <td><?= data.invites[i].hash ?></td>
+                            <td class="_select"><?= data.invites[i].hash ?></td>
                         </tr>
                         <tr>
                             <td>Eingeladen am: </td>
@@ -21,11 +24,11 @@
                         </tr>
                         <tr>
                             <td>Eingeladene Server</td>
-                            <td><?= data.invites[i].assigned_server.reduce((acc, curr) => `${acc}, ${curr}`) ?></td>
+                            <td class="_select"><?= data.invites[i].assigned_server.reduce((acc, curr) => `${acc}, ${curr}`) ?></td>
                         </tr>
                         <tr>
                             <td>
-                                <button onclick="removeInvite(<?= data.invites[i].id ?>)">Löschen</button>
+                                <button onclick="removeInvite(<?= data.invites[i].id ?>)"><?= __('Remove') ?></button>
                             </td>
                         </tr>
                     </tbody>
@@ -33,5 +36,7 @@
             </li>
         <? } ?>
     </ul>
-    <button onclick="invitation_form.show()">Freund einladen</button>
+    <div class="section">
+        <button onclick="invitation_form.show()"><?= __('Invite an friend') ?></button>
+    </div>
 </div>

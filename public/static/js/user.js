@@ -1,7 +1,7 @@
 let invitation_form = {};
 let invitation_form_schema = [
     {
-        'type': "select", 'name': "server", 'label': "Server", 'selected': user.assigned_server[0].name, 'value': user.assigned_server.map(server => ({'name': server.name, 'value': server.name})), 'attributes': {'multiple': ""}
+        'type': "select", 'name': "server", 'label': "Server", 'selected': user.assigned_server[0].name, 'value': user.assigned_server.map(server => ({'name': server.name, 'value': server.id})), 'attributes': {'multiple': ""}
     },
     {'type': "text", 'name': "user", 'label': "Nutzername"}
 ];
@@ -32,7 +32,7 @@ function invite(err, data){
     })
     .then(async (response) => {
         response = await response.json();
-        console.log(data);
+        console.log(response);
         if(response.error == null){
             new Message('success', response.data.message);
             token_form_schema[0].value = response.data.hash;
@@ -85,7 +85,7 @@ function removeInvite(id){
         console.log(response);
         if(response.error == null){
             new Message('success', response.data.message);
-            document.querySelector('ul#invitations li[data-id=' + id + ']').remove();
+            document.querySelector('ul#invitations li[data-id="' + id + '"]').remove();
         }
         else{
             new Message('error', response.error);
@@ -104,6 +104,70 @@ function stopServer(id){
     new PopUpForm("Stopping the server", [{'title': "Are you sure you want to stop this server?\nOnly an empty server can be stopped."}], ()=>{
         // TRY STOPPING THE SERVER
         fetch(`/profile/my-server/${id}/stop`, {
+            'method': "POST",
+            'credentials': 'same-origin',
+            'headers': {
+                'Content-Type': "application/json; charset=utf-8",
+                'CSRF-Token': token
+            },
+            'Accept': 'application/json'
+        }).then(async (response)=>{
+            response = await response.json();
+            console.log(response);
+            if(response.error == null){
+                new Message('success', response.data.message);
+
+            }
+            else{
+                new Message('error', response.error);
+                console.error(response.error);
+            }
+        }, (error)=>{
+            new Message('error', error);
+        })
+    });
+}
+
+function stopServer(id){
+    if(isNaN(id)){
+        console.error('ID cannot be NaN');
+        throw new Error('ID cannot be NaN');
+    }
+    new PopUpForm("Stopping the server", [{'title': "Are you sure you want to stop this server?\nOnly an empty server can be stopped."}], ()=>{
+        // TRY STOPPING THE SERVER
+        fetch(`/profile/my-server/${id}/stop`, {
+            'method': "POST",
+            'credentials': 'same-origin',
+            'headers': {
+                'Content-Type': "application/json; charset=utf-8",
+                'CSRF-Token': token
+            },
+            'Accept': 'application/json'
+        }).then(async (response)=>{
+            response = await response.json();
+            console.log(response);
+            if(response.error == null){
+                new Message('success', response.data.message);
+
+            }
+            else{
+                new Message('error', response.error);
+                console.error(response.error);
+            }
+        }, (error)=>{
+            new Message('error', error);
+        })
+    });
+}
+
+function startServer(id){
+    if(isNaN(id)){
+        console.error('ID cannot be NaN');
+        throw new Error('ID cannot be NaN');
+    }
+    new PopUpForm("Starting the server", [{'title': "Are you sure you want to start this server?"}], ()=>{
+        // TRY STOPPING THE SERVER
+        fetch(`/profile/my-server/${id}/start`, {
             'method': "POST",
             'credentials': 'same-origin',
             'headers': {

@@ -359,7 +359,6 @@ app.post('/signup', async function(req, res) {
             data: null
         });
     }
-    res.end();
 });
 
 // LOAD ALL ROUTERS

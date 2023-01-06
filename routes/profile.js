@@ -3,7 +3,9 @@ const ping = require('minecraft-server-util');
 const Users = require('../src/Model/Users');
 const Servers = require('../src/Model/Server');
 const Invitations = require('../src/Model/Invitation');
+const Mcsm = require('../src/Mcsm');
 const pushLog = require('../lib/pushLog');
+
 
 router.all('*', function(req, res, next){
     if(req.user == null){
@@ -40,33 +42,57 @@ router.get('/my-server', function(req, res) {
 router.post('/my-server/:id/start', function(req, res) {
     const server = req.user.assigned_server.find(s => s.id == req.params.id);
     if(server){
-        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
+        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), async (error, sd) => {
             if (error == null){
                 if(server.name == sd.descriptionText){
                     res.json({
                         'error': "Server is already running",
-                        'message': "Failed"
+                        'data': {
+                            'message': "Failed"
+                        }
                     });
                 }
                 else{
                     if(sd.onlinePlayers == 0){
-                        res.json({
-                            'error': null,
-                            'message': "Another server is currently running. It will stopping shortly. Your server will soon start. Be patient."
+                        Mcsm.startServer(req.params.id, (error, mcsm_response)=> {
+                            if(error == null){
+                                res.json({
+                                    'error': null,
+                                    'data': mcsm_response
+                                });
+                            }
+                            else{
+                                res.json({
+                                    'error': error,
+                                    'data': mcsm_response
+                                });
+                            }
                         });
                     }
                     else{
                         res.json({
-                            'error': "Another server currently running and people are still playing. Check soon again.",
-                            'message': "Failed"
+                            'error': "Another server is running currently and people are still playing. Check again later.",
+                            'data': {
+                                'message': "Failed"
+                            }
                         });
                     }
                 }
             }
             else{
-                res.json({
-                    'error': "An error occured, try again later",
-                    'message': "Failed"
+                Mcsm.startServer(req.params.id, (error, mcsm_response)=> {
+                    if(error == null){
+                        res.json({
+                            'error': null,
+                            'data': mcsm_response
+                        });
+                    }
+                    else{
+                        res.json({
+                            'error': error,
+                            'data': mcsm_response
+                        });
+                    }
                 });
             }
         });
@@ -74,10 +100,11 @@ router.post('/my-server/:id/start', function(req, res) {
     else{
         res.json({
             'error': "You are not allowed to start this server",
-            'message': "Failed"
+            'data': {
+                'message': "Failed"
+            }
         });
     }
-    res.end();
 });
 
 router.post('/my-server/:id/stop', function(req, res) {
@@ -88,30 +115,38 @@ router.post('/my-server/:id/stop', function(req, res) {
                 if(server.name == sd.descriptionText){
                     if(sd.onlinePlayers == 0){
                         // REQUEST SERVER STOP
-
+                        Mcsm.stopServer();
                         res.json({
                             'error': null,
-                            'message': "Stopping requested"
+                            'data': {
+                                'message': "Stopping requested"
+                            }
                         });
                     }
                     else{
                         res.json({
                             'error': "Server is not empty",
-                            'message': "Failed"
+                            'data': {
+                                'message': "Failed"
+                            }
                         });
                     }
                 }
                 else{
                     res.json({
                         'error': "Another server is currently running",
-                        'message': "Failed"
+                        'data': {
+                            'message': "Failed"
+                        }
                     });
                 }
             }
             else{
                 res.json({
                     'error': "An error occured, try again later",
-                    'message': "Failed"
+                    'data': {
+                        'message': "Failed"
+                    }
                 });
             }
         });
@@ -119,13 +154,15 @@ router.post('/my-server/:id/stop', function(req, res) {
     else{
         res.json({
             'error': "You are not allowed to stop this server",
-            'message': "Failed"
+            'data': {
+                'message': "Failed"
+            }
         });
     }
 });
 
-router.get('/invites', function(req, res){
-    let invited_by_user = Invitations.getByInvited(req.user.name);
+router.get('/invites', async function(req, res){
+    let invited_by_user = await Invitations.getByInvited(req.user.name);
     res.ejsRender('invites', {'invites': invited_by_user}, (err, file)=>{
         if(err == null){
             res.clearCookie('msgs');
@@ -140,12 +177,12 @@ router.get('/invites', function(req, res){
     });
 });
 
-router.delete('/invites/delete/:id', function(req, res){
-    let invite = Invitations.get(req.params.id);
+router.delete('/invites/delete/:id', async function(req, res){
+    let invite = await Invitations.get(req.params.id);
     if(invite != null && invite.invited_by == req.user.name){
         Invitations.remove(invite.id).then(()=>{
             pushLog("Invitation was removed", "Delete Invitation")
-            res.json({error: null, message: "Deletion successful"});
+            res.json({error: null, data: {message: "Deletion successful"}});
         }, (error)=>{
             pushLog(error, "Delete Invitation")
             res.json({error: "Something went wrong", message: null});
@@ -154,21 +191,22 @@ router.delete('/invites/delete/:id', function(req, res){
     else{
         res.status(403);
         pushLog("No such Invitation or no permission", "Delete Invitation");
-        res.json({error: "Either there is no invitation with this id or you do not have permission", message: null});
+        res.json({error: "Either there is no invitation with this id or you do not have permission", data: {message: null}});
     }
 });
 
-router.post('/invite', function(req, res) {
+router.post('/invite', async function(req, res) {
     if(Array.isArray(req.body.server) && typeof req.body.user == "string"){
-        let invited_by_user = Invitations.getByInvited(req.user.name);
+        req.body.server = req.body.server.filter(s => s);
+        let invited_by_user = await Invitations.getByInvited(req.user.name);
         let user_invitation = invited_by_user.find(invitation => invitation.user == req.body.user);
         if(user_invitation){
-            Invitations.update(user_invitation.id, {'assigned_server': req.body.server}, true).then((id) => {
+            Invitations.update(user_invitation.id, {'assigned_server': req.body.server}, true).then(async (id) => {
                 res.json({
                     error: null,
                     data: {
                         'message': `Der bestehende Einladungstoken wurde für ${req.body.user} erneut generiert.`,
-                        'hash': Invitations.get(user_invitation.id).hash
+                        'hash': await Invitations.get(user_invitation.id).hash
                     }
                 });
             }).catch((error)=> {
@@ -179,12 +217,13 @@ router.post('/invite', function(req, res) {
             });
         }
         else{
-            Invitations.create(req.body.user, req.user.name, req.body.server).then((id) => {
+            Invitations.create(req.body.user, req.user.name, req.body.server).then(async (id) => {
+                const invite = await Invitations.get(id);
                 res.json({
                     error: null,
                     data: {
                         'message': `Ein Einladungstoken wurde für ${req.body.user} generiert!`,
-                        'hash': Invitations.get(id).hash
+                        'hash': invite.hash
                     }
                 });
             }).catch((error)=> {

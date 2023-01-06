@@ -133,6 +133,13 @@ textarea {
     overflow-x: hidden;
 }
 
+.section {
+    width: 100%;
+    display: block;
+    margin: 20px auto;
+    overflow-x: hidden;
+}
+
 @media only screen and (max-width: 980px) {
     .container {
         width: 100% !important;
