@@ -5,7 +5,28 @@
         }
     },
     "services": {
-
+        "mojang": {
+            "hostname": "api.mojang.com",
+            "path": "",
+            "secure": true,
+            "port": 443,
+            "authorization": {
+                "type": null
+            },
+            "headers": {
+                "Accept": "*/*",
+                "Content-Type": "application/json"
+            },
+            "queries": {},
+            "endpoints": {
+                "getIdByName": {
+                    "path": "/users/profiles/minecraft/{{name}}",
+                    "method": "GET",
+                    "headers": {},
+                    "queries": {}
+                }
+            }
+        }
     },
     "emails": {
         "default": {

@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Willkommensgeschenk",
+        "description": "",
+        "claimed": [
+            
+        ],
+        "rewards": {
+            "minecraft:diamond": 3
+        }
+    }
+]

@@ -17,7 +17,7 @@
     "url": "https://github.com/MertDalbudak/mcsw/issues"
   },
   "dependencies": {
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.5",
     "crypto": "^1.0.1",
     "csurf": "^1.11.0",
@@ -27,7 +27,7 @@
     "express-fileupload": "^1.2.0",
     "express-session": "^1.17.1",
     "mariadb": "^2.5.1",
-    "minecraft-server-util": "~1.4.3",
+    "minecraft-server-util": "^5.4.0",
     "moment": "^2.29.1",
     "nodemailer": "^6.6.1",
     "oauth": "^0.9.15"

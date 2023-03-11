@@ -1,13 +1,16 @@
 const fs = require('fs/promises');
 const crypto = require('crypto');
-const Servers = require(process.env.ROOT + '/src/Model/Server')
+const ROOT = process.env.ROOT;
+const Servers = require(ROOT + '/src/Model/Server')
+const Users = require(ROOT + '/src/Model/Users')
+const MojangAPI = require(ROOT + '/src/Mojang-API')
 const Invitations = {};
-const file_path = process.env.ROOT + '/data/invitation.json';
+const file_path = ROOT + '/data/invitation.json';
 
 /**
  * Gets invitation by it's  unique_id
  * @param {Number|String} unique_id
- * @return {{}} User
+ * @return {{}} Invitation
  * @public
  */
 Invitations.get = async (id) => {
@@ -16,20 +19,20 @@ Invitations.get = async (id) => {
 };
 
 /**
- * Gets invitation by user
- * @param {Number|String} user
- * @return {[{}]} Users
+ * Gets invitation by name
+ * @param {Number|String} name
+ * @return {[{}]} Invitation
  * @public
  */
- Invitations.getByUser = async (user) => {
+ Invitations.getByName = async (name) => {
     let invitations = await Invitations.getAll();
-    return invitations.filter(invitation => invitation.user == user);
+    return invitations.filter(invitation => invitation.name == name);
 };
 
 /**
  * Gets invitation by invited_by
  * @param {Number|String} invited_by
- * @return {[{}]} Users
+ * @return {[{}]} Invitation
  * @public
  */
  Invitations.getByInvited = async (invited_by) => {
@@ -57,58 +60,96 @@ Invitations.getAll = async (everything = false) =>{
 
 /**
  * Creates a new invitation
- * @param {Number|String} user
- * @param {Number[]} assigned_server
+ * @param {Number|String} name
+ * @param {{id, administrator, permissions}} assigned_servers
  * @return {Promise} Status
  * @public
  */
-Invitations.create = async (user, invited_by, assigned_server = []) => {
-    let assigned_server_exists = true;
-    for(let i = 0; i < assigned_server.length; i++){
-        if(isNaN(assigned_server[i])){
-            throw new Error(`Assigned Server identifier needs to be a Number. Expected a Number, ${typeof assigned_server[i]} given.`);
+Invitations.create = async (name, invited_by, assigned_servers = []) => {
+    // CHECK IF invited_by ALREADY EXISTIS
+    invited_by = await Users.getByName(invited_by);
+    if(invited_by != null){
+        // GET USERS MOJANG UUID
+        let uuid = "";
+        try{
+            uuid = await MojangAPI.getIdByName(name);
+        }
+        catch(error){
+            console.error(error);
+            throw new Error("No Mojang Account linked with the given name: " + name);
+        }
+        let assigned_servers_exists = false;
+        for(let i = 0; i < assigned_servers.length; i++){
+            if(isNaN(assigned_servers[i].id)){
+                throw new Error(`Assigned Server identifier needs to be a Number. Expected a Number, ${typeof assigned_servers[i].id} given.`);
+            }
+            else{
+                assigned_servers[i].id = parseInt(assigned_servers[i].id);
+                if(await Servers.get(assigned_servers[i].id)){
+                    if(invited_by.assigned_servers.find(e => e.id == assigned_servers[i].id).permissions.inviteOthers){
+                        assigned_servers_exists = true;
+                    }
+                    else{
+                        throw new Error(`No permission to invite other people for this server`);
+                    }
+                }
+            }
+        }
+        if(assigned_servers_exists){
+            // REORDER PERMISSION
+            const assigned_servers_options = ['id', 'permissions']
+            assigned_servers = assigned_servers.map(e => {
+                e.permissions = {
+                    'inviteOthers': e.inviteOthers ? true : false,
+                    'start': e.start ? true : false,
+                    'stop': e.stop ? true : false,
+                    'restart': e.restart ? true : false,
+                }
+                for(let key in e){
+                    if(!assigned_servers_options.find(option => option == key))
+                        delete e[key];
+                }
+                return e;
+            });
+            let invitations = await Invitations.getAll(true);
+            let hash = crypto.randomBytes(16).toString('hex');
+            let invitation = {'id': invitations.auto_increment++, 'name': name, 'uuid': uuid, 'invited_by': invited_by.name, 'hash': hash, 'assigned_servers': assigned_servers, 'invitation_date': Date.now()};
+            invitations.list.push(invitation);
+            await fs.writeFile(file_path, JSON.stringify(invitations, null, "\t"), {'encoding': 'utf-8'});
+            return invitation;
         }
         else{
-            assigned_server[i] = parseInt(assigned_server[i]);
-            if(await Servers.get(assigned_server[i]) == null)
-                assigned_server_exists = false;
+            throw new Error('Assigned Server does not exists');
         }
     }
-    if(assigned_server_exists){
-        let invitations = await Invitations.getAll(true);
-        let hash = crypto.randomBytes(16).toString('hex');
-        let invitation = {'id': invitations.auto_increment++, 'user': user, 'invited_by': invited_by, 'hash': hash, 'assigned_server': assigned_server, 'invitation_date': Date.now()};
-        invitations.list.push(invitation);
-        await fs.writeFile(file_path, JSON.stringify(invitations), {'encoding': 'utf-8'});
-        return invitations.auto_increment - 1;
-    }
     else{
-        throw new Error('Assigned Server does not exists');
+        throw new Error("Inviting name does't exists");
     }
 };
 
 /**
  * Gets invitation by it's  unique_id
- * @param {Number|String} user
+ * @param {Number|String} name
  * @param {{}} data
- * @return {Promise} Status
+ * @return {Promise} Invitation
  * @public
  */
 Invitations.update = async (id, data, new_hash = false) => {
     let invitations = await Invitations.getAll(true);
-    let options = ['invited_by', 'assigned_server'];
+    let options = ['invited_by', 'assigned_servers'];
     for(let key in data){
-        if(options.find(option => option == key) == undefined){
+        if(options.hasOwnProperty(key)){
             delete data[key];
         }
     }
     if(new_hash){
         data['hash'] = crypto.randomBytes(16).toString('hex');
     }
-
-    Object.assign(invitations.list.find(invite => invite.id == id), data);
+    let invitation = invitations.list.find(invite => invite.id == id);
+    Object.assign(invitation, data);
     
-    return fs.writeFile(file_path, JSON.stringify(invitations), {'encoding': 'utf-8'});
+    await fs.writeFile(file_path, JSON.stringify(invitations, null, "\t"), {'encoding': 'utf-8'});
+    return invitation;
 };
 
 /**

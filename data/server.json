@@ -1,14 +1,3 @@
 [
-    {
-        "id": 0,
-        "name": "Zockerecke",
-        "bin": "minecraft2",
-        "location": "/home/pi/paper"
-    },
-    {
-        "id": 1,
-        "name": "Micky Mouse Fan Club",
-        "bin": "paper2",
-        "location": "/home/pi/paper2"
-    }
+
 ]

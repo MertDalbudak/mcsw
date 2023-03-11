@@ -1,1 +1,40 @@
-[{"name":"hatrez","hash":"$2b$12$G3A3tHUJ8o5fNGORlbFzHeszGEkpjvhvKPaE7koEStO5Cv6FMpS9q","assigned_server":[0,1],"create_date":1591023476099},{"name":"DerOZ3552","hash":"$2b$10$UFCU3ztxhZUaZ.J3Ucmuhe2K6MPJlhnGf8xO/l0fHlo4xzED4DbkG","assigned_server":[0],"create_date":1672861206388},{"name":"sikiCEM71","hash":"$2b$10$eL35qVz76Wp1M8/MEOJP1.Uw.xYBnQ55RqbBVGtxlGnQoJSK5ai4S","assigned_server":[1],"create_date":1672952668074},{"name":"sgttarik789","hash":"$2b$10$W6TeUatmyRZs51k9qhkZseC.xDidbFWK3xBda.oJIT1q.fwASXrRS","assigned_server":[0],"create_date":1672959303663}]
+[
+	{
+		"name": "hatrez",
+		"uuid": "bf7bdce7dfe141f09d78b4f89fa15f71",
+		"hash": "$2b$12$G3A3tHUJ8o5fNGORlbFzHeszGEkpjvhvKPaE7koEStO5Cv6FMpS9q",
+		"assigned_servers": [
+			{
+				"id": 1,
+				"administrator": true,
+				"permissions": {
+					"inviteOthers": true,
+					"start": true,
+					"stop": true,
+					"restart": true
+				}
+			},
+			{
+				"id": 2,
+				"administrator": true,
+				"permissions": {
+					"inviteOthers": false,
+					"start": false,
+					"stop": true,
+					"restart": false
+				}
+			},
+			{
+				"id": 3,
+				"administrator": true,
+				"permissions": {
+					"inviteOthers": true,
+					"start": true,
+					"stop": true,
+					"restart": true
+				}
+			}
+		],
+		"create_date": 1591023476099
+	}
+]
