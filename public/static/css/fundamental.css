@@ -92,6 +92,20 @@ button {
     box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .1);
 }
 
+button.white{
+    background-color: #FFF;
+}
+
+button.red{
+    background-color: #f46f67;
+    color: #000;
+}
+
+button.green{
+    background-color: #4fb979;
+    color: #FFF;
+}
+
 button:focus {
     outline: none;
     background-color: #00AA00;
@@ -440,6 +454,44 @@ ul#msg_container li.msg div.msg_close button {
 
 /******* MESSAGES *******/
 
+
+/******* STATIC MESSAGES *******/
+
+div.msg {
+    padding: 8px;
+    margin: 10px auto;
+    display: block;
+    position: relative;
+    border-radius: 10px;
+}
+
+div.msg:nth-child(1){
+    margin-top: 0 !important;
+}
+
+div.msg.error {
+    background: #f46f67;
+}
+
+div.msg.warn {
+    background: #f5db82;
+}
+
+div.msg.success {
+    background: #4fb979;
+}
+
+div.msg span{
+    color: #666;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: .2px;
+}
+
+/******* STATIC MESSAGES *******/
+
+/******* HEADER *******/
+
 #header {
     width: 100%;
     height: 80px;
@@ -584,7 +636,7 @@ body.menu-active #menu {
 #header_banner {
     height: 551px;
     position: relative;
-    background-image: url('/image/background.jpg');
+    background-image: url('/image/background.webp');
     background-size: auto 100%;
     background-repeat: no-repeat;
     background-position: center center;
@@ -603,6 +655,10 @@ body.menu-active #menu {
     white-space: nowrap;
 }
 
+/******* HEADER *******/
+
+/******* DATA TABLES *******/
+
 table.data_table {
     min-width: 50%;
     width: max-content;
@@ -613,16 +669,21 @@ table.data_table {
 
 table.data_table td {
     padding: 5px;
+    vertical-align: top;
 }
 
 table.data_table tr td:first-child {
+    width: 35%;
     padding-left: 0;
     font-weight: 600;
 }
 
 table.data_table tr td:last-child {
+    width: 65%;
     padding-right: 0;
 }
+
+/******* DATA TABLES *******/
 
 .offline_symbol, .online_symbol {
     height: 15px;
@@ -652,3 +713,195 @@ table.data_table tr td:last-child {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* CODE OF CONDUCT */
+
+#code-of-conduct-list > li {
+    list-style-type: none;
+}
+
+.code-of-conduct-server-type {
+    padding: 5px 20px;
+}
+
+.code-of-conduct-rule_list {
+    padding: 10px 20px;
+}
+
+.code-of-conduct-rule_list li {
+    padding: 5px 0;
+    list-style-type: square;
+}
+/* CODE OF CONDUCT */
+
+/* SERVER AND SLOT */
+
+#server-list-container {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+#server-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#server-list > li {
+    min-height: 270px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 10px 0;
+    border: 5px solid #EAEAEA;
+}
+
+#server-list > li.online{
+    background: linear-gradient(rgba(10, 62, 98, .8), #000);
+    border-color: #000;
+    background-blend-mode: lighten;
+}
+
+#server-list > li.offline{
+    background-image: url(/image/dirt.webp);
+    background-size: contain;
+    background-repeat: repeat;
+    border-color: #413931;
+}
+
+#server-list > li table {
+    width: 100%;
+    color: #FFF;
+    border: none;
+}
+#server-list > li.online table{
+    background-image: url('/image/mini-world.webp');
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-size: auto 100%;
+    background-blend-mode: lighten;
+}
+
+#server-list > li.offline table{
+    background: linear-gradient(#000000, rgba(52, 52, 52, 0.6)), url(/image/mini-world.webp);
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-size: auto 100%;
+    background-blend-mode: saturation;
+}
+
+#server-list > li table tr td:first-child {
+    width: 45%;
+}
+
+#slot-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#slot-list > li {
+    width: calc(50% - 10px);
+    list-style-type: none;
+    border: 5px solid #EEE;
+    border-radius: 8px;
+    margin: 10px 10px 10px 0;
+    position: relative;
+}
+
+#slot-list > li:nth-child(2) {
+    margin: 10px 0 10px 10px !important;
+}
+
+#slot-list > li.online {
+    border-color: #4fb979;
+}
+
+#slot-list > li table {
+    width: 100%;
+    border: none;
+    overflow: hidden;
+}
+
+#slot-list > li div {
+    min-height: fit-content;
+    margin: calc(160px / 2) auto;
+    line-height: 30px;
+    text-align: center;
+}
+
+@media only screen and (max-width: 780px) {
+    #slot-list > li {
+        width: 100%;
+        margin: 10px 0 10px 0 !important;
+    }
+    #slot-list > li:nth-child(2) {
+        margin: 10px 0 10px 0 !important;
+    }
+    #slot-list > li div {
+        margin: calc(120px / 2) auto;
+    }
+}
+
+/* SERVER AND SLOT */
+
+/* PILLBOX */
+
+ul.pillbox.absolute {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+ul.pillbox > li {
+    list-style-type: none;
+    display: inline-block;
+    line-height: 20px;
+    margin: 0 3px;
+    padding: 5px 15px;
+    border-radius: 5px;
+    letter-spacing: 1.1px;
+    font-weight: 500;
+    text-align: center;
+    border-color: transparent;
+}
+
+ul.pillbox > li:nth-child(1) {
+    margin: 0 3px 0 0;
+}
+
+ul.pillbox > li:last-child {
+    margin: 0 0 0 3px;
+}
+
+ul.pillbox.vertical > li {
+    display: list-item;
+    margin: 5px 0;
+}
+
+ul.pillbox.vertical > li:nth-child(1) {
+    margin: 0 0 5px 0;
+}
+
+ul.pillbox.vertical > li:last-child {
+    margin: 5px 0 0 0;
+}
+
+ul.pillbox > li.pill-java{
+    background: #de463b;
+    color: #FFF;
+}
+
+ul.pillbox > li.pill-bedrock{
+    background: #464646;
+    color: #FFF;
+}
+
+ul.pillbox > li.pill-paper{
+    background-color: #e8e6e3;
+    color: #1e2021;
+}
+
+/* PILLBOX */

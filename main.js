@@ -155,11 +155,18 @@ app.use(async function(req, res, next){
     req.check_user_status = new Promise(async (resolve, reject)=> {
         if(req.session != undefined){
             if(req.session.username != undefined){
-                req.user = await Users.get(req.session.username);
-                resolve();
+                const user = await Users.getByName(req.session.username);
+                if(user){
+                    req.user = user;
+                    resolve();
+                }
+                else{
+                    reject();
+                }
             }
-            else
+            else{
                 reject();
+            }
         }
         else
             reject();
@@ -235,31 +242,15 @@ app.post('/signin', async function(req, res) {
         return;
     }
     // CHECK IF PASSWORD IS CORRECT
-    let user = await Users.get(req.body.user);
-    if(user != undefined){
-        console.log(req.body);
+    Users.getByMojangName(req.body.user).then(async (user)=>{
         if(req.body.user && req.body.password){
             const check_password = await bcrypt.compare(req.body.password.toString(), user['hash']);
             if(check_password){
                 // TODO SET COOKIE
-                req.session.username = req.body.user;
+                req.session.username = user.name;
                 req.session.ip_address = req.remoteAddressAnonym;
                 req.session.user_agent = req.headers['user-agent'];
-                /* EXPRESS FRAMEWORK NOT ALLOWING THIS OR UNEXPECTED BEHAVIOR
-                req.session.save((error)=>{
-                    console.log(error);
-                    if(error == null)
-                        res.newMessage("success", "Angemeldet");
-                    else
-                        res.newMessage("error", "signIn_loginFailedSummary", "signInFailedStore_message");
-                    res.redirect(302, '/');
-                });
-                await req.session.save().then(()=> {
-                    res.newMessage("success", "Angemeldet")
-                }, (error) => {
-                    res.newMessage("error", "signIn_loginFailedSummary", "signInFailedStore_message");
-                });
-                */
+                
                 pushLog(`User ${req.body.user} successfuly logged in`, "SignIn", 'request');
 
                 res.json({
@@ -269,6 +260,7 @@ app.post('/signin', async function(req, res) {
             }
             else{
                 pushLog(`Wrong password for user: ${req.body.user}`, "SignIn", 'request');
+                res.statusCode = 400;
                 res.json({
                     error: "Wrong username or password",
                     data: null
@@ -278,23 +270,20 @@ app.post('/signin', async function(req, res) {
         }
         else{
             pushLog(`Either user or password was empty`, "SignIn", 'request');
+            res.statusCode = 400;
             res.json({
                 error: "Mandatory field cannot be empty",
                 data: null
             });
         }
-    }
-    else{
+    }).catch((error)=> {
         pushLog(`No user with username: ${req.body.user}`, "SignIn", 'request');
+        res.statusCode = 400;
         res.json({
             error: "Wrong username or password",
             data: null
         });
-        //res.newMessage("error", "signIn_loginFailedMessage");
-        //res.redirect(302, '/signin');
-        // PASSWORD WRONG
-        // PUSH TO FAILED LOGINS
-    }
+    });
 });
 
 
@@ -305,52 +294,40 @@ app.post('/signup', async function(req, res) {
         res.redirect(302, '/');
         return;
     }
-    if(await Users.get(req.body.user) == null){
-        let invitations = await Invitations.getAll();
-        let invitation = invitations.findIndex(e => (e.user == req.body.user && e.hash == req.body.invitation_code));
-        if(invitation != -1){
-            const salt = bcrypt.genSaltSync(SALT_ROUNDS);
-            const hash = bcrypt.hashSync(req.body.password, salt);
-            Users.create(req.body.user, hash, invitations[invitation].assigned_server).then(function(sql_res){
-                pushLog(`Users successfuly created`, "SignUp", 'sql');
-                res.json({
-                    error: null,
-                    data: "Benutzer erfolgreich angelegt"
-                });
-                //res.redirect(302, '/');
-            }).catch(function(err){
-            console.error(err);
-            pushLog(err, 'Insert new User', 'sql');
-                //res.newMessage('error', "error_pageTitle")
-                res.json({
-                    error: 'Bei der Erstellung eines neuen Nutzers ist ein Fehler aufgetreten',
-                    data: null
-                });
-            });
-            /*
-            const requestBody = {
-    
-            };
-            const newContact = new RestApi('EC', 'setContact');
-            newContact.req(JSON.stringify(requestBody)).then(function(data){
+    res.statusCode = 400;
+    if(await Users.getByName(req.body.user) == null){
+        let invitations = await Invitations.getByName(req.body.user);
+        for(let i = 0; i < invitations.length; i++){
+            let invitation = invitations[i];
+            if(invitation && invitation.hash == req.body.invitation_code){
                 const salt = bcrypt.genSaltSync(SALT_ROUNDS);
                 const hash = bcrypt.hashSync(req.body.password, salt);
-                Users.create(...)
-            }, function(error){
-                pushLog(error, "Create Contact");
-                res.redirect('?success_msg[0]=Registrierung%20fehlgeschlagen');
-            }).catch(function(error){
-                pushLog(error);
-                res.redirect('?success_msg[0]=Registrierung%20fehlgeschlagen');
-            });*/
+                Users.create(invitation.uuid, invitation.name, hash, invitation.assigned_servers).then(function(created_user){
+                    pushLog(`Users successfuly created`, "SignUp", 'sql');
+                    Invitations.remove(invitation.id);
+                    res.statusCode = 201;
+                    res.json({
+                        error: null,
+                        data: "Benutzer erfolgreich angelegt"
+                    });
+                    //res.redirect(302, '/');
+                }).catch(function(error){
+                    console.log(invitation);
+                    console.error(error);
+                    pushLog(error.toString(), 'Insert new User', 'sql');
+                    res.json({
+                        error: error.toString(),
+                        data: null
+                    });
+                });
+                return;
+            }
         }
-        else{
-            //res.newMessage('error', "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.")
-            res.json({
-                error: "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.",
-                data: null
-            });
-        }
+        //res.newMessage('error', "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.")
+        res.json({
+            error: "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist nicht gültig.",
+            data: null
+        });
     }
     else{
         //res.newMessage('error', "Der eingegebene Einladungstoken für den Nutzer: " + req.body.user + " ist ungültig.")

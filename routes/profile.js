@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const ping = require('minecraft-server-util');
 const Users = require('../src/Model/Users');
 const Servers = require('../src/Model/Server');
 const Invitations = require('../src/Model/Invitation');
@@ -18,13 +17,17 @@ router.all('*', function(req, res, next){
     }
 });
 
-router.get('/my-server', function(req, res) {
-    let server_data = null;
-    ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
-        if (error == null){
-            server_data = sd;
-        }
-        res.ejsRender('my-server.ejs', {'server_data': server_data}, (err, file) => {
+router.get('/my-server', async function(req, res) {
+    let slot_data = [];
+    try{
+        slot_data = await Mcsm.getAllSlots()
+        console.log(slot_data);
+    }
+    catch(error){
+        pushLog(error, "MCSM");
+    }
+    finally{
+        res.ejsRender('my-server.ejs', {'slots': slot_data}, (err, file) => {
             if(err == null){
                 res.clearCookie('msgs');
                 res.send(file);
@@ -36,127 +39,139 @@ router.get('/my-server', function(req, res) {
             }
             res.end();
         });
-    });
+    }
 });
 
-router.post('/my-server/:id/start', function(req, res) {
-    const server = req.user.assigned_server.find(s => s.id == req.params.id);
-    if(server){
-        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), async (error, sd) => {
-            if (error == null){
-                if(server.name == sd.descriptionText){
-                    res.json({
-                        'error': "Server is already running",
-                        'data': {
-                            'message': "Failed"
-                        }
-                    });
-                }
-                else{
-                    if(sd.onlinePlayers == 0){
-                        Mcsm.startServer(req.params.id, (error, mcsm_response)=> {
-                            if(error == null){
-                                res.json({
-                                    'error': null,
-                                    'data': mcsm_response
-                                });
-                            }
-                            else{
-                                res.json({
-                                    'error': error,
-                                    'data': mcsm_response
-                                });
-                            }
-                        });
-                    }
-                    else{
-                        res.json({
-                            'error': "Another server is running currently and people are still playing. Check again later.",
-                            'data': {
-                                'message': "Failed"
-                            }
-                        });
-                    }
-                }
-            }
-            else{
-                Mcsm.startServer(req.params.id, (error, mcsm_response)=> {
-                    if(error == null){
-                        res.json({
-                            'error': null,
-                            'data': mcsm_response
-                        });
-                    }
-                    else{
-                        res.json({
-                            'error': error,
-                            'data': mcsm_response
-                        });
-                    }
+router.post('/my-server/:slot_uid/:server_id/start', async function(req, res) {
+    const server_id = req.params.server_id;
+    const slot = await Mcsm.getStatus(req.params.slot_uid);
+    if(slot){
+        if(slot.server == null){
+            const user_permission = req.user.assigned_servers.find(s => (s.id == server_id && s.permissions.start));
+            if(user_permission){
+                // REQUEST SERVER STOP
+                Mcsm.startServer(slot.uid, server_id, (error, data)=>{
+                    // DO STUFF
                 });
-            }
-        });
-    }
-    else{
-        res.json({
-            'error': "You are not allowed to start this server",
-            'data': {
-                'message': "Failed"
-            }
-        });
-    }
-});
-
-router.post('/my-server/:id/stop', function(req, res) {
-    const server = req.user.assigned_server.find(s => s.id == req.params.id);
-    if(server){
-        ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
-            if (error == null){
-                if(server.name == sd.descriptionText){
-                    if(sd.onlinePlayers == 0){
-                        // REQUEST SERVER STOP
-                        Mcsm.stopServer();
-                        res.json({
-                            'error': null,
-                            'data': {
-                                'message': "Stopping requested"
-                            }
-                        });
-                    }
-                    else{
-                        res.json({
-                            'error': "Server is not empty",
-                            'data': {
-                                'message': "Failed"
-                            }
-                        });
-                    }
-                }
-                else{
-                    res.json({
-                        'error': "Another server is currently running",
-                        'data': {
-                            'message': "Failed"
-                        }
-                    });
-                }
-            }
-            else{
                 res.json({
-                    'error': "An error occured, try again later",
-                    'data': {
-                        'message': "Failed"
-                    }
+                    'error': null,
+                    'data': {},
+                    'message': "Starting requested"
                 });
             }
-        });
+            else{
+                res.statusCode = 403;
+                res.json({
+                    'error': "You are not allowed to start this server",
+                    'data': {},
+                    'message': "Failed"
+                });
+            }
+        }
+        else{
+            res.statusCode = 400;
+            res.json({
+                'error': "Slot already has a server assigned.",
+                'data': {},
+                'message': "Failed"
+            });
+        }
     }
     else{
+        res.statusCode = 400;
         res.json({
-            'error': "You are not allowed to stop this server",
-            'data': {
-                'message': "Failed"
+            'error': "Unfortunately there is no slot running currently to run this server",
+            'data': {},
+            'message': "Failed"
+        });
+    }
+});
+
+router.post('/my-server/:slot_uid/:server_id/restart', async function(req, res) {
+    const server_id = req.params.server_id;
+    const slot = await Mcsm.getStatus(req.params.slot_uid);
+    if(slot){
+        if(slot.server != null && slot.server.id == server_id){
+            const user_permission = req.user.assigned_servers.find(s => (s.id == server_id && s.permissions.restart));
+            if(user_permission){
+                // REQUEST SERVER STOP
+                Mcsm.restartServer(slot.uid, server_id, (error, data)=>{
+                    // DO STUFF
+                });
+                res.json({
+                    'error': null,
+                    'data': {},
+                    'message': "Restart requested"
+                });
             }
+            else{
+                res.statusCode = 403;
+                res.json({
+                    'error': "You are not allowed to start this server",
+                    'data': {},
+                    'message': "Failed"
+                });
+            }
+        }
+        else{
+            res.statusCode = 400;
+            res.json({
+                'error': "Cannot restart server which is not running already.",
+                'data': {},
+                'message': "Failed"
+            });
+        }
+    }
+    else{
+        res.statusCode = 400;
+        res.json({
+            'error': "Unfortunately there is no slot running currently to run this server",
+            'data': {},
+            'message': "Failed"
+        });
+    }
+});
+
+
+router.post('/my-server/:id/stop', async function(req, res) {
+    const slot = await Mcsm.getStatus(req.params.id);
+    if(slot){
+        const server = slot.server;
+        const user_permission = req.user.assigned_servers.find(s => (s.id == server.id && s.permissions.stop));
+        if(user_permission){
+            if(server.players.online == 0){
+                // REQUEST SERVER STOP
+                Mcsm.stopServer(slot.uid);
+                res.json({
+                    'error': null,
+                    'data': {},
+                    'message': "Stopping requested"
+                });
+            }
+            else{
+                res.statusCode = 400;
+                res.json({
+                    'error': "Server is not empty",
+                    'data': {},
+                    'message': "Failed"
+                });
+            }
+        }
+        else{
+            res.statusCode = 403;
+            res.json({
+                'error': "You are not allowed to stop this server",
+                'data': {},
+                'message': "Failed"
+            });
+        }
+    }
+    else{
+        res.statusCode = 400;
+        res.json({
+            'error': "No Server found running",
+            'data': {},
+            'message': "Failed"
         });
     }
 });
@@ -182,7 +197,7 @@ router.delete('/invites/delete/:id', async function(req, res){
     if(invite != null && invite.invited_by == req.user.name){
         Invitations.remove(invite.id).then(()=>{
             pushLog("Invitation was removed", "Delete Invitation")
-            res.json({error: null, data: {message: "Deletion successful"}});
+            res.json({error: null, message: "Deletion successful"});
         }, (error)=>{
             pushLog(error, "Delete Invitation")
             res.json({error: "Something went wrong", message: null});
@@ -191,23 +206,22 @@ router.delete('/invites/delete/:id', async function(req, res){
     else{
         res.status(403);
         pushLog("No such Invitation or no permission", "Delete Invitation");
-        res.json({error: "Either there is no invitation with this id or you do not have permission", data: {message: null}});
+        res.json({error: "Either there is no invitation with this id or you do not have permission", data: {}});
     }
 });
 
 router.post('/invite', async function(req, res) {
     if(Array.isArray(req.body.server) && typeof req.body.user == "string"){
-        req.body.server = req.body.server.filter(s => s);
         let invited_by_user = await Invitations.getByInvited(req.user.name);
-        let user_invitation = invited_by_user.find(invitation => invitation.user == req.body.user);
+        let user_invitation = invited_by_user.find(invitation => invitation.name == req.body.user);
         if(user_invitation){
-            Invitations.update(user_invitation.id, {'assigned_server': req.body.server}, true).then(async (id) => {
+            Invitations.update(user_invitation.id, {'assigned_servers': req.body.server}, true).then(async (invitation) => {
                 res.json({
                     error: null,
                     data: {
-                        'message': `Der bestehende Einladungstoken wurde für ${req.body.user} erneut generiert.`,
-                        'hash': await Invitations.get(user_invitation.id).hash
-                    }
+                        'hash': invitation.hash
+                    },
+                    'message': `Der bestehende Einladungstoken wurde für ${invitation.name} erneut generiert.`
                 });
             }).catch((error)=> {
                 res.json({
@@ -217,21 +231,23 @@ router.post('/invite', async function(req, res) {
             });
         }
         else{
-            Invitations.create(req.body.user, req.user.name, req.body.server).then(async (id) => {
-                const invite = await Invitations.get(id);
+            try{
+                const invite = await Invitations.create(req.body.user, req.user.name, req.body.server);
                 res.json({
                     error: null,
                     data: {
-                        'message': `Ein Einladungstoken wurde für ${req.body.user} generiert!`,
                         'hash': invite.hash
-                    }
+                    },
+                    'message': `Ein Einladungstoken wurde für ${req.body.user} generiert!`,
                 });
-            }).catch((error)=> {
+            }
+            catch(error){
+                console.error(error);
                 res.json({
-                    error: error,
+                    error: error.toString(),
                     data: null
                 });
-            });
+            }
         }
     }
     else{

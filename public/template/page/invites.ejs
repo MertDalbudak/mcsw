@@ -12,7 +12,7 @@
                     <tbody>
                         <tr>
                             <td>Benutzername</td>
-                            <td class="_select"><?= data.invites[i].user ?></td>
+                            <td class="_select"><?= data.invites[i].name ?></td>
                         </tr>
                         <tr>
                             <td>Einladungstoken</td>
@@ -24,7 +24,7 @@
                         </tr>
                         <tr>
                             <td>Eingeladene Server</td>
-                            <td class="_select"><?= data.invites[i].assigned_server.reduce((acc, curr) => `${acc}, ${curr}`) ?></td>
+                            <td class="_select"><?= data.invites[i].assigned_servers.map(e => e.id).join(', ') ?></td>
                         </tr>
                         <tr>
                             <td>

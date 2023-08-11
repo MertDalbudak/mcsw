@@ -1,0 +1,83 @@
+{
+    "database": {
+        "default": {
+            "host": "localhost",
+            "port": 3306,
+            "username": "username",
+            "password": "password",
+            "database": "db",
+            "type": "MariaDB"
+        }
+    },
+    "services": {
+        "EC": {
+            "hostname": "host.name",
+            "path": "/path",
+            "secure": true,
+            "port": 443,
+            "authorization": {
+                "type": "Basic",
+                "username": "user",
+                "password": "password"
+            },
+            "headers": {
+                "Accept": "*/*"
+            },
+            "queries": {},
+            "endpoints": {
+                "allAccounts": {
+                    "path": "/accounts",
+                    "method": "GET",
+                    "headers": {
+                        "Accept": "application/json"
+                    },
+                    "queries": {
+                        "onlyData": true
+                    }
+                }
+            }
+        },
+        "IDCS": {
+            "hostname": "localhost",
+            "path": "/path",
+            "secure": true,
+            "port": 443,
+            "authorization": {
+                "type": "OAuth2",
+                "hostname": "https://oauth.ident",
+                "auth_path": null,
+                "token_path": "/oauth2/v1/token",
+                "client_id": "id",
+                "client_secret": "secret",
+                "params": {
+                    
+                }
+            },
+            "headers": {},
+            "queries": {},
+            "endpoints": {
+                "getUser": {
+                    "path": "/Users/{{id}}",
+                    "method": "GET",
+                    "headers": {
+                        "Content-Type": "application/scim+json"
+                    },
+                    "queries": {}
+                }
+            }
+        }
+    },
+    "emails": {
+        "default": {
+            "host": "localhost",
+            "port": 25,
+            "user": null,
+            "password": null,
+            "client": null
+        }
+    },
+    "languages": [
+        "root",
+        "de-de"
+    ]
+}

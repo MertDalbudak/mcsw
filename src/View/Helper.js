@@ -32,7 +32,7 @@ Helper.debug = function(data){
                 return '<span class="' + cls + '">' + match + '</span>';
             });
     }
-    return `<pre class="debug">${debug_string}</pre>`;
+    return `<pre class="debug _select">${debug_string}</pre>`;
 };
 
 Helper.langShort = function(lang){
@@ -46,6 +46,16 @@ Helper.form = function(options){
 Helper.csrf = function(csrfToken){
     return `<input type="hidden" name="_csrf" value="${csrfToken}" autocomplete="off" />`;
 };
+/**
+ * 
+ * @param {'success'|'warn'|'error'} type 
+ * @param {String} subject 
+ * @param {String} text 
+ * @returns {String}
+ */
+Helper.message = function(type, text){
+    return `<div class="msg ${type}"><span>${text}</span></div>`;
+}
 
 Helper.moment = require('moment');
 

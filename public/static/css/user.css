@@ -3,29 +3,14 @@
 }
 
 
-
-#server-list-container {
-    display: flex;
-    flex-direction: row;
-}
-
-#server-list {
+#invitations{
     display: flex;
     flex-direction: column;
 }
 
-#server-list li {
+#invitations li {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;
-}
-
-#server-list li table {
-    width: 100%;
-    margin: 10px 0;
-}
-
-#server-list li table tr td:first-child {
-    width: 45%;
 }

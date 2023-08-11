@@ -603,6 +603,6 @@
     "signInFailedStore_message": "There was a problem signing into your account. Try a different browser and report to webmaster@lancom-systems.de",
     "signOut_message": "You have successfully logged out",
     "signOutForce_message": "You have been logged out",
-    "signOutNotLatest_message": "You were automatically singed out because there is a more recent session with your account."
-    
+    "signOutNotLatest_message": "You were automatically singed out because there is a more recent session with your account.",
+    "code of conduct": "Code of conduct"
 }

@@ -1,16 +1,21 @@
-require('dotenv').config();
-
 const router = require('express').Router();
-const ping = require('minecraft-server-util');
+const Mcsm = require('../src/Mcsm')
+const Servers = require('../src/Model/Server')
 const pushLog = require('../lib/pushLog');
 
-router.get('/', function(req, res) {
-    let server_data = null;
-    ping(process.env.MC_SERVER_IP, parseInt(process.env.MC_SERVER_PORT), (error, sd) => {
-        if (error == null){
-            server_data = sd;
-        }
-        res.ejsRender('home.ejs', {'server_data': server_data}, (err, file) => {
+router.get('/', async function(req, res) {
+    let slots = null, servers = null;
+    try{
+        slots = await Mcsm.getAllSlots();
+        servers = await Servers.getAll();
+        console.log(slots);
+        console.log(slots[0].server.players);
+    }
+    catch(error){
+        pushLog(error, "MC Serve Query")
+    }
+    finally{
+        res.ejsRender('home.ejs', {'slots': slots, 'servers': servers}, (err, file) => {
             if(err == null){
                 res.clearCookie('msgs');
                 res.send(file);
@@ -21,12 +26,27 @@ router.get('/', function(req, res) {
             }
             res.end();
         });
-    });
+    }
 });
 
 router.get('/faq', function(req, res){
     // TODO CREATE MESSAGE IN SESSION
     res.ejsRender('faq.ejs', (err, file) => {
+        if(err == null){
+            res.clearCookie('msgs');
+            res.send(file);
+        }
+        else{
+            pushLog(err, "rendering home");
+            res.sendStatus(500);
+        }
+        res.end();
+    });
+});
+
+router.get('/code-of-conduct', function(req, res){
+    // TODO CREATE MESSAGE IN SESSION
+    res.ejsRender('code-of-conduct.ejs', (err, file) => {
         if(err == null){
             res.clearCookie('msgs');
             res.send(file);

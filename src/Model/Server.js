@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
+const ROOT = process.env.ROOT;
 const Servers = {};
-
-const file_path = process.env.ROOT + '/data/server.json';
+const file_path = ROOT + '/data/server.json';
 
 /**
  * Gets server by it's unique_id
