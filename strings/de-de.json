@@ -559,8 +559,8 @@
     "footer_company_details_url": "url",
     "under_construction_notice": "Diese Website befindet sich derzeit im Aufbau",
     "signInFailStackLocked_message": "Ihr Konto wurde gesperrt, da 5 mal hintereinander ein falsches Passwort verwendet wurde. Bitte setzen Sie ihr Passwort zurück!",
-    "signInFailedStore_message": "Ein Fehler ist beim Anmeldeprozess aufgtreten. Versuche dich mit einem anderen browser anzumenlden. Melde dein Vorfall bei webmaster@lancom-systems.de",
     "signOut_message": "Sie sind nun abgemeldet",
     "signOutForce_message": "Sie wurden abgemeldet",
-    "signOutNotLatest_message": "Sie wurden automatisch abgemeldet, da mit Ihrem Konto eine neuere Sitzung vorliegt."
+    "signOutNotLatest_message": "Sie wurden automatisch abgemeldet, da mit Ihrem Konto eine neuere Sitzung vorliegt.",
+    "code of conduct": "Verhaltenskodex"
 }

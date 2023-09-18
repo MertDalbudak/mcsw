@@ -490,6 +490,7 @@ div.msg span{
 
 /******* STATIC MESSAGES *******/
 
+/******* HEADER *******/
 
 #header {
     width: 100%;
@@ -654,6 +655,10 @@ body.menu-active #menu {
     white-space: nowrap;
 }
 
+/******* HEADER *******/
+
+/******* DATA TABLES *******/
+
 table.data_table {
     min-width: 50%;
     width: max-content;
@@ -664,16 +669,21 @@ table.data_table {
 
 table.data_table td {
     padding: 5px;
+    vertical-align: top;
 }
 
 table.data_table tr td:first-child {
+    width: 35%;
     padding-left: 0;
     font-weight: 600;
 }
 
 table.data_table tr td:last-child {
+    width: 65%;
     padding-right: 0;
 }
+
+/******* DATA TABLES *******/
 
 .offline_symbol, .online_symbol {
     height: 15px;
@@ -751,7 +761,6 @@ table.data_table tr td:last-child {
 #server-list > li.online{
     background: linear-gradient(rgba(10, 62, 98, .8), #000);
     border-color: #000;
-    
     background-blend-mode: lighten;
 }
 
@@ -795,7 +804,6 @@ table.data_table tr td:last-child {
 
 #slot-list > li {
     width: calc(50% - 10px);
-    min-height: 250px;
     list-style-type: none;
     border: 5px solid #EEE;
     border-radius: 8px;
@@ -818,11 +826,82 @@ table.data_table tr td:last-child {
 }
 
 #slot-list > li div {
-    width: 80%;
-    height: fit-content;
-    margin: calc(180px / 2) auto;
+    min-height: fit-content;
+    margin: calc(160px / 2) auto;
     line-height: 30px;
     text-align: center;
 }
 
+@media only screen and (max-width: 780px) {
+    #slot-list > li {
+        width: 100%;
+        margin: 10px 0 10px 0 !important;
+    }
+    #slot-list > li:nth-child(2) {
+        margin: 10px 0 10px 0 !important;
+    }
+    #slot-list > li div {
+        margin: calc(120px / 2) auto;
+    }
+}
+
 /* SERVER AND SLOT */
+
+/* PILLBOX */
+
+ul.pillbox.absolute {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+ul.pillbox > li {
+    list-style-type: none;
+    display: inline-block;
+    line-height: 20px;
+    margin: 0 3px;
+    padding: 5px 15px;
+    border-radius: 5px;
+    letter-spacing: 1.1px;
+    font-weight: 500;
+    text-align: center;
+    border-color: transparent;
+}
+
+ul.pillbox > li:nth-child(1) {
+    margin: 0 3px 0 0;
+}
+
+ul.pillbox > li:last-child {
+    margin: 0 0 0 3px;
+}
+
+ul.pillbox.vertical > li {
+    display: list-item;
+    margin: 5px 0;
+}
+
+ul.pillbox.vertical > li:nth-child(1) {
+    margin: 0 0 5px 0;
+}
+
+ul.pillbox.vertical > li:last-child {
+    margin: 5px 0 0 0;
+}
+
+ul.pillbox > li.pill-java{
+    background: #de463b;
+    color: #FFF;
+}
+
+ul.pillbox > li.pill-bedrock{
+    background: #464646;
+    color: #FFF;
+}
+
+ul.pillbox > li.pill-paper{
+    background-color: #e8e6e3;
+    color: #1e2021;
+}
+
+/* PILLBOX */

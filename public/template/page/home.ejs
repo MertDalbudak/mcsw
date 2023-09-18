@@ -7,7 +7,7 @@
         <? if(data.slots != null){ ?>
         <? let current_server = data.slots.find(slot => slot.server && slot.server.players.sample != null && slot.server.players.sample.find(player => player.name == user.name)); ?>
             <? if(current_server) { ?>
-    <span>Du hast dich dem Server <b><?= current_server.server.motd.clean ?></b> verbunden. Spiele <b>fair</b> und sei <b>kein Spielverderber</b>.</span>
+    <span>Du hast dich mit dem Server <b><?= current_server.server.motd.clean ?></b> verbunden. Spiele <b>fair</b> und sei <b>kein Spielverderber</b>.</span>
             <? } else { ?>
     <span>Du bist im Moment mit keinem Server verbunden</span>
             <? } ?>
@@ -15,54 +15,65 @@
     <span>Aktuell ist kein Minecraft Server online. Wenn du Lust hast zu spielen, starte einfach unter <b>Meine Server</b> ein Server hoch.</span>
         <? } ?>
     <? } ?>
-    <?- //debug(data.server_data) ?>
+    <?- //debug(data.slots) ?>
+    <? if(data.slots.length > 0){ ?>
     <ul id="slot-list">
         <? for(var i = 0; i < data.slots.length; i++){ ?>
             <? if(data.slots[i].server) { ?>
             <? let server = data.slots[i].server; ?>
             <? let favicon = server.favicon || "/image/logo96x96.png"; ?>
-            <li class="online">
-                <table cellpadding="0" cellspacing="0" class="data_table">
-                    <thead>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="2">
-                                <img src="<?= favicon ?>" alt="Server Image" height="64" width="64" class="crisp_edge" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Status') ?></td>
-                            <td><i class="online_symbol"></i>Online</td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Hostname') ?></td>
-                            <td class="_select"><?= data.slots[i].host ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('MOTD') ?></td>
-                            <td class="_select"><?= server.motd.clean ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Version') ?></td>
-                            <td class="_select"><?= server.version.name ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Players') ?></td>
-                            <td class="_select"><?= server.players.online ?> / <?= server.players.max ?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </li>
+        <li class="online">
+            <? if(user) { ?>
+            <ul class="pillbox absolute">
+            <? let user_assigned_server = user.assigned_servers.find(e => e.id == server.id); ?>
+                <li class="pill-<?= user_assigned_server.server.type.toLowerCase() ?>"><?= __(user_assigned_server.server.type) ?></li>
+                <li class="pill-<?= user_assigned_server.server.server.toLowerCase() ?>"><?= __(user_assigned_server.server.server) ?></li>
+            </ul>
+            <? } ?>
+            <table cellpadding="0" cellspacing="0" class="data_table">
+                <thead>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="2">
+                            <img src="<?= favicon ?>" alt="Server Image" height="64" width="64" class="crisp_edge" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><?= __('Status') ?></td>
+                        <td><i class="online_symbol"></i><?= __('Online') ?></td>
+                    </tr>
+                    <tr>
+                        <td><?= __('Hostname') ?></td>
+                        <td class="_select"><?= data.slots[i].host ?></td>
+                    </tr>
+                    <tr>
+                        <td><?= __('MOTD') ?></td>
+                        <td class="_select"><?= server.motd.clean ?></td>
+                    </tr>
+                    <tr>
+                        <td><?= __('Version') ?></td>
+                        <td class="_select"><?= server.version.name ?></td>
+                    </tr>
+                    <tr>
+                        <td><?= __('Players') ?></td>
+                        <td class="_select"><?= server.players.online ?> / <?= server.players.max ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
             <? } else { ?>
-            <li class="offline">
-                <div>
-                    <h3><?= data.slots[i].host ?></h3>
-                    <h4><i class="offline_symbol"></i>Offline</h4>
-                </div>
-            </li>
+        <li class="offline">
+            <div>
+                <h3><?= data.slots[i].host ?></h3>
+                <h4><i class="offline_symbol"></i><?= __('Offline') ?></h4>
+            </div>
+        </li>
             <? } ?>
         <? } ?>
     </ul>
-    Bitte lies dir den <a href="/code-of-conduct">Verhaltenskodex</a> durch, falls du es bisher nicht getan hast.
+    <? } else { ?>
+    <h2><?= __('No slots data available') ?></h2>
+    <? } ?>
+    <p>Bitte lies dir den <a href="/code-of-conduct"><?= __('code of conduct') ?></a> durch, bevor du einem Server joinst.</p>
 </div>

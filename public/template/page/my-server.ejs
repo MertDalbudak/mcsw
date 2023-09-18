@@ -73,12 +73,18 @@
         </ul>
     </div>
     <h2>Server Slots</h2>
+    <? if(data.slots.length > 0){ ?>
     <ul id="slot-list">
         <? for(var i = 0; i < data.slots.length; i++){ ?>
             <? if(data.slots[i].server) { ?>
             <? let server = data.slots[i].server; ?>
             <? let favicon = server.favicon || "/image/logo96x96.png"; ?>
             <li class="online">
+                <ul class="pillbox absolute">
+            <? let user_assigned_server = user.assigned_servers.find(e => e.id == server.id); ?>
+                <li class="pill-<?= user_assigned_server.server.type.toLowerCase() ?>"><?= __(user_assigned_server.server.type) ?></li>
+                <li class="pill-<?= user_assigned_server.server.server.toLowerCase() ?>"><?= __(user_assigned_server.server.server) ?></li>
+                </ul>
                 <table cellpadding="0" cellspacing="0" class="data_table">
                     <thead>
                     </thead>
@@ -121,4 +127,7 @@
             <? } ?>
         <? } ?>
     </ul>
+    <? } else { ?>
+    <h2>No slots data available</h2>
+    <? } ?>
 </div>
