@@ -23,6 +23,7 @@
     "csurf": "^1.11.0",
     "dotenv": "^8.6.0",
     "ejs": "^3.1.5",
+    "evilscan": "^1.9.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "express-session": "^1.17.1",

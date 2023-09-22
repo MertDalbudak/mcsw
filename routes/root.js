@@ -5,12 +5,12 @@ const pushLog = require('../lib/pushLog');
 router.get('/', async function(req, res) {
     let slots = null;
     try{
-        slots = await Mcsm.getAllSlots();
+        slots = await Mcsm.getNetworkSlots();
         console.log(slots);
         console.log(slots[0].server.players);
     }
     catch(error){
-        pushLog(error, "MC Serve Query")
+        pushLog(error, "MC Serve Query");
     }
     finally{
         res.ejsRender('home.ejs', {'slots': slots}, (err, file) => {

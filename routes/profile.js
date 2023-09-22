@@ -20,7 +20,7 @@ router.all('*', function(req, res, next){
 router.get('/my-server', async function(req, res) {
     let slot_data = [];
     try{
-        slot_data = await Mcsm.getAllSlots()
+        slot_data = await Mcsm.getNetworkSlots()
         console.log(slot_data);
     }
     catch(error){
@@ -51,7 +51,7 @@ router.post('/my-server/:slot_uid/:server_id/start', async function(req, res) {
             if(user_permission){
                 // REQUEST SERVER STOP
                 Mcsm.startServer(slot.uid, server_id, (error, data)=>{
-                    // DO STUFF
+                    console.log(error, data);
                 });
                 res.json({
                     'error': null,

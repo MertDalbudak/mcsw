@@ -1,13 +1,14 @@
 const net = require('net');
 const util = require('minecraft-server-util');
+const ScanNetwork = require('../lib/ScanNetwork');
 const pushLog = require('../lib/pushLog');
 const Mcsm = {};
 
-const mcsm_hosts = process.env.MCSM_HOSTS.split(',').map(e => {
+const mcsm_endpoints = process.env.MCSM_ENDPOINTS.split(',').map(e => {
     e = e.split(':');
     return {'host': e[0], 'port': e[1]}
 });
-console.log(mcsm_hosts);
+console.log(mcsm_endpoints);
 
 let mcsm_slots = [];
 
@@ -101,28 +102,32 @@ Mcsm.restartServer = async (slot_uid, server_id, callback) => {
  * @param {Number} slot_uid 
  * @returns {*}
  */
-Mcsm.getStatus = async (slot_uid) => mcsm_slots.find(e => e.uid == slot_uid) || (await Mcsm.getAllSlots()).find(e => e.uid == slot_uid);
+Mcsm.getStatus = async (slot_uid) => mcsm_slots.find(e => e.uid == slot_uid) || (await Mcsm.getNetworkSlots()).find(e => e.uid == slot_uid);
 
 /**
  * GET LIST OF SERVER SLOTS
  * @returns {Void}
  * @public
  */
-Mcsm.getSlots = (host, callback) =>{
-    const payload = getRequestPayload('getSlotList');
-    connect(host, payload, callback);
+Mcsm.getSlotData = (endpoint, callback) =>{
+    pushLog(`Requesting Slot Data of ${endpoint.host}`, "MCSM");
+    const payload = getRequestPayload('getSlotData');
+    connect(endpoint, payload, callback);
 };
 
+/**
+ * GETS ALL PREDEFINED SERVER SLOTS
+ * @returns {Void}
+ * @public
+ */
 Mcsm.getAllSlots = async () => {
     let promises = [], slots = [];
-    for(let i = 0; i < mcsm_hosts.length; i++){
+    for(let i = 0; i < mcsm_endpoints.length; i++){
         promises.push(new Promise((resolve)=> {
-            Mcsm.getSlots(mcsm_hosts[i], (error, data)=>{
-                if(Array.isArray(data)){
-                    for(let j = 0; j < data.length; j++){
-                        data[j].uid = parseInt(`${i}${data[j].id}`);
-                        data[j].mcsm_host = mcsm_hosts[i];
-                    }
+            Mcsm.getSlotData(mcsm_endpoints[i], (error, data)=>{
+                if(error == null){
+                    data.uid = parseInt(`${i}${data.id}`);
+                    data.mcsm_host = mcsm_endpoints[i];
                 }
                 resolve({'error': error, 'data': data});
             });
@@ -142,9 +147,44 @@ Mcsm.getAllSlots = async () => {
     return slots;
 };
 
+/**
+ * GETS ALL SERVER SLOTS IN SAME NETWORK
+ * @returns {Void}
+ * @public
+ */
+Mcsm.getNetworkSlots = async () => {
+    let promises = [], slots = [];
+    let found = await ScanNetwork();
+    found = found.map(e => ({'host': e.ip, 'port': e.port}));
+    for(let i = 0; i < found.length; i++){
+        promises.push(new Promise((resolve)=> {
+            Mcsm.getSlotData(found[i], (error, data)=>{
+                if(error == null){
+                    data.uid = parseInt(`${i}${data.id}`);
+                    data.mcsm_host = found[i];
+                }
+                resolve({'error': error, 'data': data});
+            });
+        }));
+    }
+    console.log(found);
+    mcsm_responses = await Promise.all(promises);
+    for(let i = 0; i < mcsm_responses.length; i++){
+        let mcsm_response = mcsm_responses[i];
+        if(mcsm_response.error == null){
+            slots.push(mcsm_response.data);
+        }
+        else{
+            console.error(mcsm_response.error);
+        }
+    }
+    mcsm_slots = slots;
+    return slots;
+};
+
 function connect(host, payload, callback){
     const client = net.createConnection(host, ()=>{
-        pushLog(`Connection to MCSM Server established. Requesting Slot List ...`, "MCSM");
+        pushLog(`Connection to MCSM Server established.`, "MCSM");
         client.write(payload);
     });
     let response = "";
