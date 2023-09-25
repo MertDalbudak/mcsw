@@ -1,40 +1,26 @@
 [
     {
-        "id": 1,
+        "id": 2340594410650665,
         "name": "Zockerecke",
         "server": "Paper",
         "type": "Java"
     },
     {
-        "id": 2,
+        "id": 5952986860616583,
         "name": "Micky Mouse Fan Club",
         "server": "Paper",
-        "type": "Java",
-        "path": "/mnt/servers/minecraft/paper2",
-        "logPath": "/logs/latest.log",
-        "owner": "hatrez",
-        "version": "^1.19.3",
-        "discord": {
-            "token": "MTA1MDkyMjE4MjQ4MzY1Njc4NA.GBwGZf.wEMzldkvd3c64jNv4prShFS0PvR1CNHCLFGz7g",
-            "clientId": "1050922182483656784",
-            "channels":[
-                {
-                    "id": "1057462190094950590",
-                    "name": "minecraft-activities"
-                }
-            ],
-            "obeyCommand": [
-                "server", "list", "version", "banList"
-            ],
-            "eventListener": [
-                "banFlying", "checkDeath", "antiToxicity"
-            ]
-        }
+        "type": "Java"
     },
     {
-        "id": 3,
-        "name": "Ogens Server",
-        "server": "Paper",
-        "type": "Java"
+        "id": 4744520118160516,
+        "name": "Test Server",
+        "server":"Paper",
+        "type":"Java"
+    },
+    {
+        "id": 94110810672576,
+        "name": "Ubuntu",
+        "server":"Paper",
+        "type":"Java"
     }
 ]

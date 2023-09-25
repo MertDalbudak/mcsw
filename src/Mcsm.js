@@ -200,6 +200,7 @@ function connect(host, payload, callback){
             }
         }
         catch(error){
+            pushLog(host, "MCSM Error");
             pushLog(error.toString(), "MCSM Error");
             callback(error, null);
         }
@@ -211,6 +212,7 @@ function connect(host, payload, callback){
     });
     client.setTimeout(1500, () => {
         client.destroy();
+        console.log(callback);
         callback("Timeout", null);
     });
 }

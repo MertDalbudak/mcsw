@@ -65,8 +65,9 @@
             <? } else { ?>
         <li class="offline">
             <div>
-                <h3><?= data.slots[i].host ?></h3>
+                <h2><?= data.slots[i].name ?></h3>
                 <h4><i class="offline_symbol"></i><?= __('Offline') ?></h4>
+                <h3><?= data.slots[i].domain ?></h3>
             </div>
         </li>
             <? } ?>
