@@ -72,12 +72,15 @@ function invite(err, data){
                         new Message('warn', "Du kannst jederzeit ein neuen Einlungstoken für deine Freunde erstellen.")
                     });
                 } else {
-                    navigator.clipboard.writeText(response.data.hash).then(function() {
-                        new Message('success', "Der Einladungstoken wurde in deine Zwischenablage gespeichert")
-                    }, function(error){
-                        new Message('error', "Der Einladungstoken konnte leider nicht in die Zwischenablage abgelegt werden.")
+                    try{
+                        navigator.clipboard.writeText(response.data.hash).then(function() {
+                            new Message('success', "Der Einladungstoken wurde in deine Zwischenablage gespeichert")
+                        });
+                    }
+                    catch(error){
+                        new Message('error', "Der Einladungstoken konnte leider nicht in die Zwischenablage abgelegt werden.");
                         console.error(error);
-                    });
+                    }
                   }
                 this.hide();
             });

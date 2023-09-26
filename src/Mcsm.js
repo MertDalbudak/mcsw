@@ -4,16 +4,15 @@ const ScanNetwork = require('../lib/ScanNetwork');
 const pushLog = require('../lib/pushLog');
 const Mcsm = {};
 
-const mcsm_endpoints = process.env.MCSM_ENDPOINTS.split(',').map(e => {
+const mcsm_endpoints = process.env.MCSM_ENDPOINTS ? process.env.MCSM_ENDPOINTS.split(',').map(e => {
     e = e.split(':');
     return {'host': e[0], 'port': e[1]}
-});
-console.log(mcsm_endpoints);
+}) : [];
 
 let mcsm_slots = [];
 
 const request_schema = {
-    'authentication': process.env.MCSM_AUTH,
+    'authentication': process.env.MCSW_AUTH,
     'command':{
         'name': "",
         'args': {
@@ -22,6 +21,12 @@ const request_schema = {
     }
 };
 
+/**
+ * 
+ * @param {String} command_name 
+ * @param {{}} args 
+ * @returns {String}
+ */
 function getRequestPayload(command_name, args = {}){
     const payload = {...request_schema};
     payload.command.name = command_name;
@@ -105,13 +110,26 @@ Mcsm.restartServer = async (slot_uid, server_id, callback) => {
 Mcsm.getStatus = async (slot_uid) => mcsm_slots.find(e => e.uid == slot_uid) || (await Mcsm.getNetworkSlots()).find(e => e.uid == slot_uid);
 
 /**
- * GET LIST OF SERVER SLOTS
+ * @name getSlotData
+ * @param {String} endpoint 
+ * @param {Function} callback
  * @returns {Void}
- * @public
  */
 Mcsm.getSlotData = (endpoint, callback) =>{
     pushLog(`Requesting Slot Data of ${endpoint.host}`, "MCSM");
     const payload = getRequestPayload('getSlotData');
+    connect(endpoint, payload, callback);
+};
+
+/**
+ * @name updateServerData
+ * @param {String} endpoint
+ * @param {Function} callback
+ * @returns {Void}
+ */
+Mcsm.updateServerData = (endpoint, server_id, config, callback) =>{
+    pushLog(`Updating Server Data of ${server_id} via ${endpoint.host}`, "MCSM");
+    const payload = getRequestPayload('updateServerData', {'server_id': server_id, 'config': config});
     connect(endpoint, payload, callback);
 };
 
@@ -143,6 +161,7 @@ Mcsm.getAllSlots = async () => {
             console.error(mcsm_response.error);
         }
     }
+    slots.sort((a, b) => a.id - b.id); 
     mcsm_slots = slots;
     return slots;
 };
@@ -178,6 +197,7 @@ Mcsm.getNetworkSlots = async () => {
             console.error(mcsm_response.error);
         }
     }
+    slots.sort((a, b) => a.id - b.id); 
     mcsm_slots = slots;
     return slots;
 };
@@ -219,6 +239,6 @@ function connect(host, payload, callback){
 
 Mcsm.util = util;
 
-Mcsm.getAllSlots();
+Mcsm.getAllSlots()
 
 module.exports = Mcsm;
