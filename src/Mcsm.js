@@ -12,7 +12,7 @@ const mcsm_endpoints = process.env.MCSM_ENDPOINTS ? process.env.MCSM_ENDPOINTS.s
 let mcsm_slots = [];
 
 const request_schema = {
-    'authentication': process.env.MCSW_AUTH,
+    'authentication': process.env.MCSM_AUTH,
     'command':{
         'name': "",
         'args': {

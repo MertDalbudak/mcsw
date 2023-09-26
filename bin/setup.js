@@ -80,7 +80,7 @@ async function env_questionaire(){
     addLine();
     addLine();
     await ask(mcsm_endpoints);
-    await ask(mcsw_auth);
+    await ask(mcsm_auth);
 
     rl.close();
     fs.writeFileSync(env_path, env);
@@ -232,13 +232,15 @@ const mcsm_endpoints = (root = true) => new Promise((res, rej) => {
     });
 });
 
-const mcsw_auth = () => new Promise((res, rej) => {
+const mcsm_auth = () => new Promise((res, rej) => {
     rl.question(`Specify a MCSM authentication phrase (at lease 8 characters): `, auth =>{
         if(auth.length < 8){
             rej("Input must be at least 8 characters long");
         }
         else{
-            addLine("MCSW_AUTH", crypto.createHash('sha256').update(auth).digest('hex'));
+            let hash = crypto.createHash('sha256').update(auth).digest('hex');
+            console.log(`API Authentication: \x1b[96m${hash}\x1b[0m`);
+            addLine("MCSM_AUTH", hash);
             res();
         }
     });
