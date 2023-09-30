@@ -21,6 +21,10 @@
                                 <td><i class="online_symbol"></i>Online</td>
                             </tr>
                             <tr>
+                                <td><?= __('Hostname') ?></td>
+                                <td class="_select"><span><?= slot.domain ?></span><?- addToClipboard(slot.domain) ?></td>
+                            </tr>
+                            <tr>
                                 <td><?= __('MOTD') ?></td>
                                 <td class="_select"><?= slot.server.motd.clean ?></td>
                             </tr>
@@ -96,15 +100,15 @@
                         </tr>
                         <tr>
                             <td><?= __('Status') ?></td>
-                            <td><i class="online_symbol"></i>Online</td>
+                            <td><i class="online_symbol"></i><?= __('Online') ?></td>
                         </tr>
                         <tr>
                             <td><?= __('Hostname') ?></td>
-                            <td class="_select"><?= data.slots[i].domain ?></td>
+                            <td class="_select"><span><?= data.slots[i].domain ?></span><?- addToClipboard(data.slots[i].domain) ?></td>
                         </tr>
                         <tr>
                             <td><?= __('MOTD') ?></td>
-                            <td class="_select"><?= server.motd.clean ?></td>
+                            <td class="_select motd"><?- server.motd.html ?></td>
                         </tr>
                         <tr>
                             <td><?= __('Version') ?></td>
@@ -120,7 +124,7 @@
             <? } else { ?>
             <li class="offline">
                 <div>
-                    <h2 class="_select"><?= data.slots[i].name ?></h3>
+                    <h2 class="_select"><?= data.slots[i].name ?></h2>
                     <h4><i class="offline_symbol"></i><?= __('Offline') ?></h4>
                     <h3 class="_select"><?= __('Connect') ?>: <?= data.slots[i].domain ?></h3>
                 </div>

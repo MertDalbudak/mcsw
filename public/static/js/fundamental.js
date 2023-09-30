@@ -55,6 +55,18 @@ function register(err, data){
     });
 }
 
+function addToClipboard(content){
+    try{
+        navigator.clipboard.writeText(content.toString()).then(function() {
+            new Message('success', "Copied!")
+        });
+    }
+    catch(error){
+        new Message('error', "An error occured trying to copy the value to the clipboard");
+        console.error(error);
+    }
+}
+
 // LOGIN FORM SUBMIT
 function login(err, data){
     if(err != null){

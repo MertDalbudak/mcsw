@@ -1,0 +1,34 @@
+#header_banner {
+    height: 551px;
+    position: relative;
+    background-color: #EAEAEA !important;
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    transition: background 1500ms;
+}
+
+#header_banner.bg1 {
+    background-image: url('/image/header_banner.webp');
+}
+
+#header_banner.bg2 {
+    background-image: url('/image/header_banner2.webp');
+}
+
+#header_banner.bg3 {
+    background-image: url('/image/header_banner3.webp');
+}
+
+#header_banner h1 {
+    padding: 20px;
+    position: absolute;
+    bottom: 20px;
+    font-size: 250%;
+    color: #FFF;
+    font-weight: 400;
+    text-shadow: 0 0 5px #000;
+    background-color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    white-space: nowrap;
+}

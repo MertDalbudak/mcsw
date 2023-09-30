@@ -1,6 +1,10 @@
+<?
+let page_name = getPageName(content);
+?>
 <title>Dalbudak: Minecraft Manage Server</title>
 <meta charset="utf-8" />
 <meta name="autor" content="Mert Dalbudak">
+
 <!-- APPLE META -->
 <meta name="apple-mobile-web-app-title" content="Minecraft Server Manager" />
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,7 +14,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/image/touch-icon-iphone-retina.png">
 <link rel="apple-touch-icon" sizes="167x167" href="/image/touch-icon-ipad-retina.png">
 <link rel="apple-touch-startup-image" href="/image/touch-icon-iphone.png">
-<!-- APPLE META -->
+
+<!-- META -->
 <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
 <meta name="HandheldFriendly" content="true">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -30,7 +35,7 @@
 </script>
 <script src="/js/user.js" defer></script>
 <? } ?>
-
+<script src="/js/<?= page_name ?>.js" defer></script>
 <!-- JS -->
 
 <!-- CSS -->
@@ -98,4 +103,4 @@
 <? if(user) { ?>
 <link rel="stylesheet" href="/css/user.css" type="text/css" />
 <? } ?>
-<!-- CSS -->
+<link rel="stylesheet" href="/css/<?= page_name ?>.css" type="text/css" />

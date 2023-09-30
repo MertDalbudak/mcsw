@@ -57,6 +57,19 @@ Helper.message = function(type, text){
     return `<div class="msg ${type}"><span>${text}</span></div>`;
 }
 
+/**
+ * 
+ * @param {String} content
+ */
+Helper.getPageName = (content) =>{
+    if(typeof content == "string"){
+        return content.split('.')[0];
+    }
+    throw new Error(`String expected, ${typeof content} given.`);
+}
+
+Helper.addToClipboard = (content) => `<a href="javascript:addToClipboard('${content}')" class="addToClipboard" title="Copy to clipboard"></a>`;
+
 Helper.moment = require('moment');
 
 module.exports = Helper;

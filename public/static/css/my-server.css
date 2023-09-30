@@ -1,7 +1,59 @@
-#server-list li{
-    border: 4px solid #EAEAEA;
-    list-style-type: none;
-    margin: 20px 0;
-    display: block;
-    padding: 20px;
+#server-list-container {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+#server-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#server-list > li {
+    min-height: 270px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 10px 0;
+    border: 5px solid #EAEAEA;
+}
+
+#server-list > li.online{
+    background: linear-gradient(rgba(10, 62, 98, .8), #000);
+    border-color: #000;
+    background-blend-mode: lighten;
+}
+
+#server-list > li.offline{
+    background-image: url(/image/dirt.webp);
+    background-size: contain;
+    background-repeat: repeat;
+    border-color: #413931;
+}
+
+#server-list > li table {
+    width: 100%;
+    color: #FFF;
+    border: none;
+}
+#server-list > li.online table{
+    background-image: url('/image/mini-world.webp');
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-size: auto 100%;
+    background-blend-mode: lighten;
+}
+
+#server-list > li.offline table{
+    background: linear-gradient(#000000, rgba(52, 52, 52, 0.6)), url(/image/mini-world.webp);
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-size: auto 100%;
+    background-blend-mode: saturation;
+}
+
+#server-list > li table tr td:first-child {
+    width: 45%;
 }

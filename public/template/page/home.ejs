@@ -45,11 +45,11 @@
                     </tr>
                     <tr>
                         <td><?= __('Hostname') ?></td>
-                        <td class="_select"><?= data.slots[i].host ?></td>
+                        <td class="_select"><span><?= data.slots[i].domain ?></span><?- addToClipboard(data.slots[i].domain) ?></td>
                     </tr>
                     <tr>
                         <td><?= __('MOTD') ?></td>
-                        <td class="_select"><?= server.motd.clean ?></td>
+                        <td class="_select motd"><?- server.motd.html ?></td>
                     </tr>
                     <tr>
                         <td><?= __('Version') ?></td>
