@@ -226,6 +226,13 @@ textarea {
     }
 }
 
+@media only screen and (max-width: 359px) {
+    #title {
+        visibility: hidden;
+        display: none;
+    }
+}
+
 .hidden {
     display: none !important;
 }
@@ -883,11 +890,17 @@ ul.pillbox > li.pill-paper{
 #footer > * {
     padding: 4px 0;
     line-height: 18px;
+    text-align: center;
 }
 
 #footer > p {
     width: fit-content;
     margin: auto;
+    font-size: .925em;
+}
+
+#footer > p a {
+    text-decoration: none;
 }
 
 #footer ul {
@@ -904,7 +917,7 @@ ul.pillbox > li.pill-paper{
 }
 
 #footer span.git_head {
-    max-width: 65px;
+    max-width: 60px;
     display: inline-block;
     white-space: nowrap;
     overflow: hidden;
