@@ -34,6 +34,7 @@
     "sortByFieldDescending": "{field} absteigend",
     "couldNotLoadDataMsg": "Daten konnten nicht geladen werden: Status \"{data}\"",
     "FAQ": "FAQ",
+    "frequentlyAskedQuestions": "Häufig gestellte Fragen",
     "settings": "Einstellungen",
     "eventsRewards": "Events & Belohnungen",
     "myServer": "Meine Server",

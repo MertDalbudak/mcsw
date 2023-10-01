@@ -1,11 +1,11 @@
 <ul id="header-nav">
     <? if(user){ ?>
     <li class="menu-btn">
-        <a class="burger-btn" onclick="toggleMenu()"><img src="/image/menu.svg" height="32"></a>
+        <a class="burger-btn" href="javascript:toggleMenu()"><img src="/image/menu.svg" height="32" alt="Menu toggle"></a>
     </li>
     <? } else { ?>
     <li class="mobile-menu-btn">
-        <a class="burger-btn" onclick="toggleMenu()"><img src="/image/menu.svg" height="32"></a>
+        <a class="burger-btn" href="javascript:toggleMenu()"><img src="/image/menu.svg" height="32" alt="Menu toggle"></a>
     </li>
     <li>
         <button class="btn" onclick="register_form.show()">Registrieren</button>

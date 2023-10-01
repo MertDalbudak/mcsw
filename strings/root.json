@@ -33,6 +33,7 @@
     "sortByFieldDescending": "{field} Descending",
     "couldNotLoadDataMsg": "Could not load data: status {data}",
     "FAQ": "FAQ",
+    "frequentlyAskedQuestions": "Frequently asked questions",
     "settings": "Settings",
     "eventsRewards": "Events & Rewards",
     "myServer": "My Servers",

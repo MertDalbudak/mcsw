@@ -6,6 +6,7 @@
     background-repeat: no-repeat;
     background-position: center center;
     transition: background 1500ms;
+    overflow-x: unset;
 }
 
 #header_banner.bg1 {
@@ -35,4 +36,45 @@
     background-color: rgba(0, 0, 0, 0.5);
     text-align: center;
     white-space: nowrap;
+}
+
+#signUp_banner {
+    width: 300px;
+    height: 70%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    right: -10%;
+    padding: 20px;
+    box-shadow: inset 0px -250px 250px -100px rgba(0, 0, 0, .7), 0 0 20px #1e0c00;
+    border: 5px solid #080300;
+    overflow: hidden;
+    background-image: url(/image/minecraft-lava.webp);
+    background-size: auto 100%;
+    background-position: center center;
+    color: #EAEAEA;
+    text-shadow: 0 0 20px #000;
+}
+
+#signUp_banner > img {
+    display: block;
+    margin: 5px auto 10px;
+}
+
+#signUp_banner button.btn {
+    margin: 10px 0;
+}
+
+@media only screen and (max-width: 780px) {
+    #signUp_banner {
+        display: none;
+        visibility: hidden;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    #signUp_banner {
+        right: 20px;
+    }
 }

@@ -1,5 +1,14 @@
 <div id="header_banner" class="container crisp_edge">
     <h1>MC Server Manager</h1>
+    <? if(!user) {?>
+    <div id="signUp_banner">
+        <img src="/image/zombie3.webp" height="160" alt="Minecraft bee" />
+        <h3>Noch kein Konto?</h3>
+        <button class="btn" onclick="register_form.show()"><?= __('signUp') ?></button>
+        <h4>Du hast bereits ein Konto?</h4>
+        <button class="btn" onclick="login_form.show()"><?= __('signIn') ?></button>
+    </div>
+    <? } ?>
 </div>
 <div class="container">
     <? if(user) {?>
@@ -21,5 +30,5 @@
     <? } else { ?>
     <h2><?= __('No slots data available') ?></h2>
     <? } ?>
-    <p>Bitte lies dir den <a href="/code-of-conduct"><?= __('code of conduct') ?></a> durch, bevor du einem Server joinst.</p>
+    <p>Bitte lies dir den <a href="/code-of-conduct"><?= __('code of conduct') ?></a> durch, bevor du einem Server beitrittst.</p>
 </div>

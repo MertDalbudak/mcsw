@@ -56,6 +56,13 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
 }
 
+h1 {
+    font-size: 24px;
+}
+h2 {
+    font-size: 20px;
+}
+
 label {
     display: block;
     margin: 3px 0;
@@ -821,7 +828,7 @@ ul.pillbox.vertical > li:last-child {
 }
 
 ul.pillbox > li.pill-java{
-    background: #de463b;
+    background-color: #de463b;
     color: #FFF;
 }
 
