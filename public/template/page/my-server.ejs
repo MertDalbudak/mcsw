@@ -17,23 +17,23 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td><?= __('Status') ?></td>
+                                <td><?= __('status') ?></td>
                                 <td><i class="online_symbol"></i>Online</td>
                             </tr>
                             <tr>
-                                <td><?= __('Hostname') ?></td>
+                                <td><?= __('hostname') ?></td>
                                 <td class="_select"><span><?= slot.domain ?></span><?- addToClipboard(slot.domain) ?></td>
                             </tr>
                             <tr>
                                 <td><?= __('MOTD') ?></td>
-                                <td class="_select"><?= slot.server.motd.clean ?></td>
+                                <td class="_select"><span class="motd"><?- slot.server.motd.html ?></span></td>
                             </tr>
                             <tr>
-                                <td><?= __('Version') ?></td>
+                                <td><?= __('version') ?></td>
                                 <td class="_select"><?= slot.server.version.name ?></td>
                             </tr>
                             <tr>
-                                <td><?= __('Players') ?></td>
+                                <td><?= __('players') ?></td>
                                 <td class="_select"><?= slot.server.players.online ?> / <?= slot.server.players.max ?></td>
                             </tr>
                             <tr>
@@ -52,7 +52,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td><?= __('Status') ?></td>
+                                <td><?= __('status') ?></td>
                                 <td><i class="offline_symbol"></i>Offline</td>
                             </tr>
                             <tr>
@@ -78,60 +78,7 @@
     </div>
     <h2>Server Slots</h2>
     <? if(data.slots.length > 0){ ?>
-    <ul id="slot-list">
-        <? for(var i = 0; i < data.slots.length; i++){ ?>
-            <? if(data.slots[i].server) { ?>
-            <? let server = data.slots[i].server; ?>
-            <? let favicon = server.favicon || "/image/logo96x96.png"; ?>
-            <li class="online">
-                <ul class="pillbox absolute">
-            <? let user_assigned_server = user.assigned_servers.find(e => e.id == server.id); ?>
-                <li class="pill-<?= user_assigned_server.server.type.toLowerCase() ?>"><?= __(user_assigned_server.server.type) ?></li>
-                <li class="pill-<?= user_assigned_server.server.server.toLowerCase() ?>"><?= __(user_assigned_server.server.server) ?></li>
-                </ul>
-                <table cellpadding="0" cellspacing="0" class="data_table">
-                    <thead>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="2">
-                                <img src="<?= favicon ?>" alt="Server Image" height="64" width="64" class="crisp_edge" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Status') ?></td>
-                            <td><i class="online_symbol"></i><?= __('Online') ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Hostname') ?></td>
-                            <td class="_select"><span><?= data.slots[i].domain ?></span><?- addToClipboard(data.slots[i].domain) ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('MOTD') ?></td>
-                            <td class="_select motd"><?- server.motd.html ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Version') ?></td>
-                            <td class="_select"><?= server.version.name ?></td>
-                        </tr>
-                        <tr>
-                            <td><?= __('Players') ?></td>
-                            <td class="_select"><?= server.players.online ?> / <?= server.players.max ?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </li>
-            <? } else { ?>
-            <li class="offline">
-                <div>
-                    <h2 class="_select"><?= data.slots[i].name ?></h2>
-                    <h4><i class="offline_symbol"></i><?= __('Offline') ?></h4>
-                    <h3 class="_select"><?= __('Connect') ?>: <?= data.slots[i].domain ?></h3>
-                </div>
-            </li>
-            <? } ?>
-        <? } ?>
-    </ul>
+        <?- include('../layout/slots.ejs') ?>
     <? } else { ?>
     <h2>No slots data available</h2>
     <? } ?>

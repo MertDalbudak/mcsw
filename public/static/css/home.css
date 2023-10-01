@@ -2,7 +2,7 @@
     height: 551px;
     position: relative;
     background-color: #EAEAEA !important;
-    background-size: auto 100%;
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
     transition: background 1500ms;
@@ -18,6 +18,10 @@
 
 #header_banner.bg3 {
     background-image: url('/image/header_banner3.webp');
+}
+
+#header_banner.bg4 {
+    background-image: url('/image/header_banner4.avif');
 }
 
 #header_banner h1 {

@@ -57,6 +57,22 @@ router.get('/code-of-conduct', function(req, res){
     });
 });
 
+router.get('/privacy-policy', function(req, res){
+    // TODO CREATE MESSAGE IN SESSION
+    let page = req.language == 'de-de' ? 'privacy-policy-de.ejs' : 'privacy-policy.ejs';
+    res.ejsRender(page, (err, file) => {
+        if(err == null){
+            res.clearCookie('msgs');
+            res.send(file);
+        }
+        else{
+            pushLog(err, "rendering home");
+            res.sendStatus(500);
+        }
+        res.end();
+    });
+});
+
 router.get('/logout', function(req, res){
     // TODO CREATE MESSAGE IN SESSION
     req.session.destroy((err)=>{

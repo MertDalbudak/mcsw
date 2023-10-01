@@ -3,29 +3,29 @@
     <ul class="container">
         <? if(user){ ?>
         <li>
-            <a class="btn" href="/profile/my-server">Meine Server</a>
+            <a class="btn" href="/profile/my-server"><?= __('myServer') ?></a>
         </li>
         <li>
-            <a class="btn" href="/profile/invites">Meine Einladungen</a>
+            <a class="btn" href="/profile/invites"><?= __('myInvites') ?></a>
         </li>
         <li>
-            <a class="btn" href="/server/events-rewards">Events & Belohnungen</a>
+            <a class="btn" href="/server/events-rewards"><?= __('eventsRewards') ?></a>
         </li>
         <li>
-            <a class="btn" href="/profile/settings">Einstellungen</a>
+            <a class="btn" href="/profile/settings"><?= __('settings') ?></a>
         </li>
         <li>
-            <a class="btn" href="/faq">FAQ</a>
+            <a class="btn" href="/faq"><?= __('FAQ') ?></a>
         </li>
         <li>
-            <a class="btn" href="/logout">Abmelden</a>
+            <a class="btn" href="/logout"><?= __('signOut') ?></a>
         </li>
         <? } else { ?>
         <li>
-            <button class="btn" onclick="register_form.show()">Registrieren</button>
+            <button class="btn" onclick="register_form.show()"><?= __('signUp') ?></button>
         </li>
         <li>
-            <button class="btn" onclick="login_form.show()">Anmelden</button>
+            <button class="btn" onclick="login_form.show()"><?= __('signIn') ?></button>
         </li>
         <? } ?>
     </ul>

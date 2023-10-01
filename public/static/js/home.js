@@ -1,6 +1,6 @@
 function home(){
     const header_banner = document.querySelector('div#header_banner');
-    const header_banner_bg = ['bg1', 'bg2', 'bg3'];
+    const header_banner_bg = ['bg1', 'bg2', 'bg3', 'bg4'];
     header_banner.classList.add(`bg${Math.floor(Math.random() * header_banner_bg.length) + 1}`);
     setInterval(()=>{
         for(let i = 0; i < header_banner_bg.length; i++){

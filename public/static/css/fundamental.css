@@ -44,6 +44,14 @@ body {
     background-color: #C7C7C7; 
 }
 
+a {
+    color: #00AA00;
+}
+
+a:active {
+    color: #d8761a;
+}
+
 h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
 }
@@ -603,10 +611,11 @@ body.menu-active #menu {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
+    padding-bottom: 10px;
 }
 
 #menu ul li {
-    padding: 10px 0;
+    padding-top: 10px;
     display: inline-block;
 }
 
@@ -625,10 +634,14 @@ body.menu-active #menu {
 
 #main {
     position: relative;
-    margin-top: 20px;
+    min-height: calc(100vh - 60px);
 }
 
-#main .container{
+#content {
+    margin: 20px 0;
+}
+
+#content .container{
     padding: 20px;
     background-color: #FFF;
 }
@@ -646,7 +659,7 @@ table.data_table {
 }
 
 table.data_table td {
-    padding: 5px;
+    line-height: 30px;
     vertical-align: top;
 }
 
@@ -833,14 +846,11 @@ ul.pillbox > li.pill-paper{
     content: "\2197";
     padding: 0 5px;
     font-size: 1.1em;
-    display: inline-block;
-    height: calc(1.1em + 5px);
     font-weight: 700;
     color: #999;
     border: 1px solid transparent;
-    /*border: 1px solid rgba(0, 0, 0, .05);
-    background-color: rgba(0, 0, 0, .05);*/
     border-radius: 3px;
+    vertical-align: top;
 }
 
 .addToClipboard:hover::before {
@@ -851,4 +861,46 @@ ul.pillbox > li.pill-paper{
 .motd {
     background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)), url(/image/dirt.webp);
     background-size: auto 100%;
+    letter-spacing: .1em;
+    padding: 0 10px;
+    display: inline-block;
+}
+
+#footer {
+    padding: 4px 0;
+    position: relative;
+    background-color: #000;
+    color: #999;
+}
+
+#footer > * {
+    padding: 4px 0;
+    line-height: 18px;
+}
+
+#footer > p {
+    width: fit-content;
+    margin: auto;
+}
+
+#footer ul {
+    display: flex;
+    justify-content: space-between;
+    width: fit-content;
+    margin: auto;
+    align-items: center;
+}
+
+#footer ul li {
+    list-style-type: none;
+    padding: 0 5px;
+}
+
+#footer span.git_head {
+    max-width: 65px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
 }
