@@ -58,9 +58,23 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
     font-size: 24px;
+    margin-bottom: 20px;
 }
+
 h2 {
     font-size: 20px;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+p.sidenote {
+    font-size: .8rem;
+    font-style: italic;
+    margin: 10px 0 20px;
 }
 
 label {
@@ -80,7 +94,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
 }
 
-input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
     outline: none;
     border-color: #3498db !important;
     box-shadow: inset 0 1px 2px rgba(27,27,27,.075), 0 0 0 3px rgb(51, 151, 219, .325);
@@ -107,18 +121,27 @@ button {
     box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .1);
 }
 
-button.white{
+input[type=button].white, input[type=submit].white, button.white{
     background-color: #FFF;
 }
 
-button.red{
+input[type=button].red, input[type=submit].red, button.red{
     background-color: #f46f67;
     color: #000;
+    font-weight: 500;
+    border: none;
 }
 
-button.green{
+input[type=button].green, input[type=submit].green, button.green{
     background-color: #4fb979;
     color: #FFF;
+    border: none;
+}
+
+input[type=button].light-blue, input[type=submit].light-blue, button.light-blue{
+    background-color: #afd7f2;
+    color: #FFF;
+    border: none;
 }
 
 button:focus {
@@ -479,7 +502,7 @@ ul#msg_container li.msg div.msg_close button {
 
 /******* STATIC MESSAGES *******/
 
-div.msg {
+.msg {
     padding: 8px;
     margin: 10px auto;
     display: block;
@@ -487,23 +510,23 @@ div.msg {
     border-radius: 10px;
 }
 
-div.msg:nth-child(1){
+.msg:nth-child(1){
     margin-top: 0 !important;
 }
 
-div.msg.error {
+.msg.error {
     background: #f46f67;
 }
 
-div.msg.warn {
+.msg.warn {
     background: #f5db82;
 }
 
-div.msg.success {
+.msg.success {
     background: #4fb979;
 }
 
-div.msg span{
+.msg span{
     color: #666;
     font-weight: 400;
     line-height: 20px;
@@ -718,26 +741,6 @@ table.data_table tr td:last-child {
   from { opacity: 1; }
   to { opacity: 0; }
 }
-
-/* CODE OF CONDUCT */
-
-#code-of-conduct-list > li {
-    list-style-type: none;
-}
-
-.code-of-conduct-server-type {
-    padding: 5px 20px;
-}
-
-.code-of-conduct-rule_list {
-    padding: 10px 20px;
-}
-
-.code-of-conduct-rule_list li {
-    padding: 5px 0;
-    list-style-type: square;
-}
-/* CODE OF CONDUCT */
 
 /* SERVER AND SLOT */
 

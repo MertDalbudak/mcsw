@@ -1,0 +1,19 @@
+/* CODE OF CONDUCT */
+
+#code-of-conduct-list > li {
+    list-style-type: none;
+}
+
+.code-of-conduct-server-type {
+    padding: 5px 20px;
+}
+
+.code-of-conduct-rule_list {
+    padding: 10px 20px;
+}
+
+.code-of-conduct-rule_list li {
+    padding: 5px 0;
+    list-style-type: square;
+}
+/* CODE OF CONDUCT */

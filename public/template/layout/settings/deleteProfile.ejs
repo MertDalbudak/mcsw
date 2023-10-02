@@ -1,0 +1,16 @@
+<h2><?= __('deleteProfile') ?></h2>
+
+<p class="msg warn">Are you sure? There is no going back once you delete your account. You will loose any of those funtionalities below:</p>
+<ul>
+    <li>Create a server</li>
+    <li>Start / Stop a server</li>
+    <li>Inviting a friend to a server</li>
+    <li>Access to all minecraft server</li>
+</ul>
+
+<form action="/profile/delete" method="post">
+    <label for="deleteProfilePassword"><?= __('password') ?></label>
+    <input id="deleteProfilePassword" type="password" name="password" />
+    <br>
+    <input type="submit" value="<?= __('delete') ?>" class="red" />
+</form>

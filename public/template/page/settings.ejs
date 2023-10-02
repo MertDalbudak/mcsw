@@ -1,4 +1,36 @@
 <div class="container">
-    <?- debug(user) ?>
-    <?- debug(data) ?>
+    <h1><?= __('settings') ?></h1>
+    <div id="settings">
+        <ul id="settings_menu">
+            <li class="settings_menu_link selected" onclick="">
+                <span><?= __('profile') ?></span>
+            </li>
+            <li class="settings_menu_link" onclick="">
+                <span><?= __('security') ?></span>
+            </li>
+            <li class="settings_menu_link" onclick="">
+                <span><?= __('requestData') ?></span>
+            </li>
+            <li class="settings_menu_link" onclick="">
+                <span><?= __('deleteProfile') ?></span>
+            </li>
+        </ul>
+        <ul id="settings_content">
+            <li class="settings_content_section selected">
+                <?- include('../layout/settings/profile.ejs') ?>
+            </li>
+            <li class="settings_content_section">
+                <?- include('../layout/settings/security.ejs') ?>
+            </li>
+            <li class="settings_content_section">
+                <?- include('../layout/settings/requestData.ejs') ?>
+            </li>
+            <li class="settings_content_section">
+                <?- include('../layout/settings/deleteProfile.ejs') ?>
+            </li>
+        </ul>
+        <button id="settings_show_menu"><img src="/image/symbol/arrow_left_white.svg"></button>
+    </div>
+    <!--<?- debug(user) ?>
+    <?- debug(data) ?>-->
 </div>

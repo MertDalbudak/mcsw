@@ -1,0 +1,24 @@
+<h2><?= __('security') ?></h2>
+<form action="/profile/updatePassword" method="post">
+    <div>
+        <label for="password"><?= __('currentPassword') ?></label>
+        <input id="password" type="password" name="password" autocomplete="off" />
+    </div>
+    <div>
+        <label for="new_password"><?= __('newPassword') ?></label>
+        <input id="new_password" type="password" name="new_password" autocomplete="off" />
+    </div>
+    <div>
+        <label for="password_repeat"><?= __('passwordRepeat') ?></label>
+        <input id="password_repeat" type="password" name="password_repeat" autocomplete="off" />
+    </div>
+    <label for="login"><?= __('loginMethod') ?></label>
+    <select id="login" name="login_accept_email">
+        <option value="username"<?= user.login_method ? " selected" : "" ?>><?= __('username') ?></option>
+        <? if(user.email){ ?>
+        <option value="email"<?= user.login_method ? " selected" : "" ?>><?= __('email') ?></option>
+        <? } ?>
+    </select>
+    <p class="sidenote"><?= __('loginMethodSuggestion') ?></p>
+    <input type="submit" value="<?= __('save') ?>" class="green" />
+</form>
