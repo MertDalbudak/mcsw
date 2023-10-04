@@ -284,7 +284,7 @@ router.post('/update', async (req, res) =>{
         res.newMessage('success', "Profile updated");
     }catch(error){
         pushLog(error.toString(), "UPDATE PROFILE");
-        res.newMessage('error', "Something went wrong");
+        res.newMessage('error', error.toString());
     }
     res.redirect('/profile/settings');
 });

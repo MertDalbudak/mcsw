@@ -114,8 +114,15 @@ Users.update = async (name, data) => {
                 delete data[key];
             }
         }
-        if(data.email && await Users.getByEmail(data.email)){
-            throw new Error(`Couldn't change email address: ${data.email} already exists`);
+        if(data.email){
+            if((await Users.getByEmail(data.email)).name != name){
+                throw new Error(`Couldn't change email address: ${data.email} already exists`);
+            }
+            else{
+                if(data.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) == null){
+                    throw new Error(`Couldn't change email address: ${data.email} is not a valid email address`);
+                }
+            }
         }
         users[userIndex] = Object.assign(user, data);
         return save(users);
