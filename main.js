@@ -242,48 +242,61 @@ app.post('/signin', async function(req, res) {
         return;
     }
     // CHECK IF PASSWORD IS CORRECT
-    Users.getByMojangName(req.body.user).then(async (user)=>{
-        if(req.body.user && req.body.password){
-            const check_password = await bcrypt.compare(req.body.password.toString(), user['hash']);
-            if(check_password){
-                // TODO SET COOKIE
-                req.session.username = user.name;
-                req.session.ip_address = req.remoteAddressAnonym;
-                req.session.user_agent = req.headers['user-agent'];
-                
-                pushLog(`User ${req.body.user} successfuly logged in`, "SignIn", 'request');
-
-                res.json({
-                    error: null,
-                    data: "Login successful"
-                });
-            }
-            else{
-                pushLog(`Wrong password for user: ${req.body.user}`, "SignIn", 'request');
-                res.statusCode = 400;
-                res.json({
-                    error: "Wrong username or password",
-                    data: null
-                });
-                // PASSWORD WRONG
-            }
+    let user = null;
+    try{
+        if(req.body.user.match(/^\S+@\S+\.\S+$/)){
+            user = await Users.getByEmail(req.body.user);
         }
         else{
-            pushLog(`Either user or password was empty`, "SignIn", 'request');
-            res.statusCode = 400;
-            res.json({
-                error: "Mandatory field cannot be empty",
-                data: null
-            });
+            user = await Users.getByMojangName(req.body.user);
+            if(user.login_method == 'email'){
+                throw new Error('Login with username is not accepted');
+            }
         }
-    }).catch((error)=> {
+    }catch(error){
+        pushLog(error.toString(), "SignIn", 'request');
         pushLog(`No user with username: ${req.body.user}`, "SignIn", 'request');
         res.statusCode = 400;
         res.json({
             error: "Wrong username or password",
             data: null
         });
-    });
+        return;
+    }
+    
+    if(user != null && req.body.password){
+        const check_password = await bcrypt.compare(req.body.password.toString(), user['hash']);
+        if(check_password){
+            // TODO SET COOKIE
+            req.session.username = user.name;
+            req.session.ip_address = req.remoteAddressAnonym;
+            req.session.user_agent = req.headers['user-agent'];
+            
+            pushLog(`User ${req.body.user} successfuly logged in`, "SignIn", 'request');
+
+            res.json({
+                error: null,
+                data: "Login successful"
+            });
+        }
+        else{
+            pushLog(`Wrong password for user: ${req.body.user}`, "SignIn", 'request');
+            res.statusCode = 400;
+            res.json({
+                error: "Wrong username or password",
+                data: null
+            });
+            // PASSWORD WRONG
+        }
+    }
+    else{
+        pushLog(`Either user or password was empty`, "SignIn", 'request');
+        res.statusCode = 400;
+        res.json({
+            error: "Mandatory field cannot be empty",
+            data: null
+        });
+    }
 });
 
 
@@ -342,7 +355,7 @@ app.post('/signup', async function(req, res) {
 fs.readdirSync(ROUTES_PATH).forEach(function(filename) {
     const route = filename == "root.js" ? '/' : `/${path.parse(filename).name}`;
     app.use(route, require(ROUTES_PATH + filename));
-},);
+});
 
 /////////////// ROUTER ///////////////
 

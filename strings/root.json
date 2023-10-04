@@ -44,6 +44,8 @@
     "players": "Players",
     "profile": "Profile",
     "security": "Security",
+    "changePassword": "Change Password",
+    "securitySettings": "Security settings",
     "requestData": "Request Data",
     "deleteProfile": "Delete Profile",
     "username": "Username",

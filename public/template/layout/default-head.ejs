@@ -34,6 +34,8 @@ let page_name = getPageName(content);
     let user = {'assigned_servers': <?- JSON.stringify(user.assigned_servers) ?>};
 </script>
 <script src="/js/user.js" defer></script>
+<? } else { ?>
+<script src="/js/no_user.js" defer></script>
 <? } ?>
 <script src="/js/<?= page_name ?>.js" defer></script>
 <!-- JS -->

@@ -1,9 +1,10 @@
 <h2><?= __('profile') ?></h2>
 <form action="/profile/update" method="post">
+    <?- csrf(form_security.csrf) ?>
     <label for="username"><?= __('username') ?></label>
-    <input type="text" id="username" value="<?= user.name ?>" />
+    <input type="text" id="username" name="username" value="<?= user.name ?>" />
     <label for="email"><?= __('email') ?></label>
-    <input type="text" id="email" value="<?= user.email ?>" />
+    <input type="text" id="email" name="email" value="<?= user.email ?>" />
     <p class="msg warn"><?= __('addEmailClarification') ?></p>
-    <input type="submit" value="<?= __('save') ?>" class="green" />
+    <button type="submit" class="green"><?= __('save') ?></button>
 </form>

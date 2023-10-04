@@ -34,6 +34,7 @@ li.settings_menu_link:hover span {
 
 li.settings_menu_link.selected span {
     font-weight: 500;
+    letter-spacing: -.0032rem;
 }
 
 ul#settings_content {

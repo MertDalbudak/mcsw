@@ -176,6 +176,7 @@ textarea {
 
 .disabled{
     pointer-events: none;
+    opacity: .75;
 }
 
 .container {

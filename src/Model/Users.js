@@ -17,19 +17,30 @@ const file_path = ROOT + '/data/user.json';
 Users.get = async (uuid) => {
     let users = await Users.getAll();
     let user = users.find(user => user.uuid == uuid) || null;
-    if(user){
-        for(let i = 0; i < user.assigned_servers.length; i++){
-            try{
-                user.assigned_servers[i].server = await Servers.get(user.assigned_servers[i].id);
-            }
-            catch(error){
-                user.assigned_servers.splice(i, 1);
-                pushLog("Couldn't find actual Servers as in assigned_servers", "Get User")
-            }
-        }
-        user.assigned_servers = user.assigned_servers.filter(e => e.server != null);
+    await populateAssignedServers(user);
+    return user;
+};
+
+/**
+ * Gets user by it's unique_id
+ * @param {Number|String} name
+ * @return {{}} User
+ * @public
+ */
+Users.getByMojangName = async (name) => await Users.get(await MojangAPI.getIdByName(name));
+
+/**
+ * Gets user by email
+ * @param {Number|String} name
+ * @return {{}} User
+ * @public
+ */
+Users.getByEmail = async (email, populate = true) => {
+    let users = await Users.getAll();
+    let user = users.find(user => user.email == email) || null;
+    if(populate){
+        await populateAssignedServers(user);
     }
-    
     return user;
 };
 
@@ -39,28 +50,11 @@ Users.get = async (uuid) => {
  * @return {{}} User
  * @public
  */
-Users.getByMojangName = async (name) => await Users.get(await MojangAPI.getIdByName(name));
-
-/**
- * Gets user by it's  unique_id
- * @param {Number|String} name
- * @return {{}} User
- * @public
- */
-Users.getByName = async (name) => {
+Users.getByName = async (name, populate = true) => {
     let users = await Users.getAll();
     let user = users.find(user => user.name == name) || null;
-    if(user){
-        for(let i = 0; i < user.assigned_servers.length; i++){
-            try{
-                user.assigned_servers[i].server = await Servers.get(user.assigned_servers[i].id);
-            }
-            catch(error){
-                user.assigned_servers.splice(i, 1);
-                pushLog("Couldn't find actual Servers as in assigned_servers", "Get User")
-            }
-        }
-        user.assigned_servers = user.assigned_servers.filter(e => e.server != null);
+    if(populate){
+        await populateAssignedServers(user);
     }
     return user;
 };
@@ -70,7 +64,7 @@ Users.getByName = async (name) => {
  * @return {{}} Users
  * @public
  */
-Users.getAll = async() => JSON.parse(await fs.readFile(file_path));
+Users.getAll = async () => JSON.parse(await fs.readFile(file_path));
 
 /**
  * Creates a new user
@@ -90,7 +84,7 @@ Users.create = async (uuid, name, hash, assigned_servers = []) => {
             users.push(user);
             // TODO add to whitelist of servers
 
-            await fs.writeFile(file_path, JSON.stringify(users, null, "\t"), {'encoding': 'utf-8'})
+            await save(users);
             return user;
         }
         else{
@@ -114,24 +108,56 @@ Users.update = async (name, data) => {
     let userIndex = users.findIndex(e => e.name == name);
     let user = users[userIndex];
     if(user){
-        let options = ['hash', 'assigned_servers'];
+        let options = ['email', 'login_method', 'hash', 'assigned_servers'];
         for(let key in data){
-            if(!options.find(key)){
+            if(!options.find(e => e == key)){
                 delete data[key];
             }
         }
-    
+        if(data.email && await Users.getByEmail(data.email)){
+            throw new Error(`Couldn't change email address: ${data.email} already exists`);
+        }
         users[userIndex] = Object.assign(user, data);
-        return fs.writeFile(file_path, JSON.stringify(users), {'encoding': 'utf-8'});
+        return save(users);
     }
     else{
         throw new Error("No user found for: " + name);
     }
 };
 
-Users.whitelist = async(uuid)=>{
+Users.whitelist = async (uuid)=>{
     const user = Users.get(uuid);
     // WHITELIST USER FOR HIS ASSIGNED SERVERS
 };
+
+Users.remove = async (uuid) =>{
+    let users = await Users.getAll();
+    let count = users.length;
+    users = users.filter(e => e.uuid != uuid)
+    if(users.length != count){
+        await save(users);
+        return true;
+    }
+    return false;
+};
+
+async function populateAssignedServers(user){
+    if(user){
+        for(let i = 0; i < user.assigned_servers.length; i++){
+            try{
+                user.assigned_servers[i].server = await Servers.get(user.assigned_servers[i].id);
+            }
+            catch(error){
+                user.assigned_servers.splice(i, 1);
+                pushLog("Couldn't find actual Servers as in assigned_servers", "Get User")
+            }
+        }
+        user.assigned_servers = user.assigned_servers.filter(e => e.server != null);
+    }
+}
+
+function save(users){
+    return fs.writeFile(file_path, JSON.stringify(users, null, "\t"), {'encoding': 'utf-8'});
+}
 
 module.exports = Users;

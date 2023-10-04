@@ -1,9 +1,13 @@
 const router = require('express').Router();
+const bcrypt = require('bcrypt');
 const Users = require('../src/Model/Users');
 const Servers = require('../src/Model/Server');
 const Invitations = require('../src/Model/Invitation');
 const Mcsm = require('../src/Mcsm');
 const pushLog = require('../lib/pushLog');
+
+// SECURITY
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || 10);
 
 
 router.all('*', function(req, res, next){
@@ -270,5 +274,106 @@ router.get('/settings', function(req, res) {
     });
 });
 
+router.post('/update', async (req, res) =>{
+    const email_change = req.body.email != req.user.email, username_change = req.body.username != req.user.name;
+    try{
+        await Users.update(req.user.name, {'email': req.body.email});
+        if(email_change){
+            // res.newMessage('warn', "We've sent you an confirmation mail. Please open the link in the email to confirm the change!");
+        }
+        res.newMessage('success', "Profile updated");
+    }catch(error){
+        pushLog(error.toString(), "UPDATE PROFILE");
+        res.newMessage('error', "Something went wrong");
+    }
+    res.redirect('/profile/settings');
+});
+
+router.post('/security/updatePassword', async (req, res) =>{
+    if(req.body.password == undefined || req.body.password == ""){
+        res.newMessage('error', "Password cannot be empty");
+        res.redirect('/profile/settings');
+        return;
+    }
+    else{
+        if(!(await bcrypt.compare(req.body.password, req.user.hash))){
+            res.newMessage('error', "Wrong password");
+            res.redirect('/profile/settings');
+            return;
+        }
+    }
+    if(req.body.new_password == undefined){
+        res.newMessage('error', "New password is mandatory");
+        res.redirect('/profile/settings');
+        return;
+    }
+    if(req.body.new_password.length < 6){
+        res.newMessage('error', "New password does not fulfill password criterias");
+        res.redirect('/profile/settings');
+        return;
+    }
+    if(req.body.new_password == req.body.password_repeat){
+        try{
+            const salt = await bcrypt.genSalt(SALT_ROUNDS);
+            const hash = await bcrypt.hash(req.body.new_password, salt);
+            await Users.update(req.user.name, {'hash': hash});
+            res.newMessage('success', "Password updated successfully");
+        }catch(error){
+            pushLog(error.toString(), "Update Password");
+            res.newMessage('error', "Something went wrong. Password couldn't be updated");
+        }
+        
+    }
+    else{
+        res.newMessage('error', "Passwords are not identical");
+    }
+    res.redirect('/profile/settings');
+});
+
+router.post('/security/update', async (req, res) =>{
+    const user_data = {};
+    const login_methods = ['username', 'email'];
+    if(login_methods.find(e => e == req.body.login_method) && req.user.login_method != req.body.login_method){
+        user_data['login_method'] = req.body.login_method;
+    }
+    try{
+        await Users.update(req.user.name, user_data);
+        res.newMessage('success', "Security settings updated");
+    }catch(error){
+        pushLog(error.toString(), "UPDATE PROFILE");
+        res.newMessage('error', "Something went wrong");
+    }
+    res.redirect('/profile/settings');
+});
+
+router.post('/delete', async (req, res) =>{
+    if(req.body.password == undefined || req.body.password == ""){
+        res.newMessage('error', "Password cannot be empty");
+        res.redirect('/profile/settings');
+        return;
+    }
+    else{
+        if(!(await bcrypt.compare(req.body.password, req.user.hash))){
+            res.newMessage('error', "Wrong password");
+            res.redirect('/profile/settings');
+            return;
+        }
+    }
+    try{
+        await Users.remove(req.user.uuid);
+        res.newMessage('success', "Profile deleted");
+        // TODO CREATE MESSAGE IN SESSION
+        req.session.destroy((err)=>{
+            if(err != null){
+                pushLog(err.toString(), "Logout");
+            }
+            res.redirect('/');
+        });
+    }catch(error){
+        pushLog(error.toString(), "DELETE PROFILE");
+        res.newMessage('error', "Something went wrong");
+        res.redirect('/profile/settings');
+    }
+});
 
 module.exports = router;

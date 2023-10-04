@@ -9,8 +9,9 @@
 </ul>
 
 <form action="/profile/delete" method="post">
+    <?- csrf(form_security.csrf) ?>
     <label for="deleteProfilePassword"><?= __('password') ?></label>
     <input id="deleteProfilePassword" type="password" name="password" />
     <br>
-    <input type="submit" value="<?= __('delete') ?>" class="red" />
 </form>
+<button id="deleteProfileButton" class="red disabled"><?= __('delete') ?></button>

@@ -1,4 +1,17 @@
+/**
+     * 
+     * @callback PopUpFormCallback
+     * @param {String} error 
+     * @param {{}} data 
+     */
+
 class PopUpForm {
+    /**
+     * 
+     * @param {String} title 
+     * @param {{}} form_schema 
+     * @param {PopUpFormCallback} callback 
+     */
     constructor(title, form_schema = {}, callback = null){
         this.title = title;
         this.form_schema = form_schema;
