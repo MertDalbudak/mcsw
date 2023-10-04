@@ -28,7 +28,6 @@ let token_form_schema = [
 ];
 
 function invite(err, data){
-    console.log(data);
     if(err != null){
         new Message('error', "Bei der eingabe ist etwas schief gelaufen");
         return false;
@@ -67,7 +66,7 @@ function invite(err, data){
                         title: 'Einladungstoken für mc.daludak.de',
                         text: `Hey ${data[1].value}, hier ist dein persönlicher Einlungstoken. Registriere dich einfach mit deinem Benutzernamen (${data[1].value}) und dem unten stehenden Token bei:\r\nhttps://mc.dalbudak.de\r\n\r\nDein Einladungstoken: ${response.data.hash}`
                     }).then(() => {
-                        console.log('Thanks for sharing!');
+                        //
                     }).catch((error) =>{
                         new Message('warn', "Du kannst jederzeit ein neuen Einlungstoken für deine Freunde erstellen.")
                     });

@@ -37,7 +37,6 @@
 }
 
 Message.prototype.hide = function(){
-    console.log("hi");
     this.element.classList.add('fade-out')
 }
 

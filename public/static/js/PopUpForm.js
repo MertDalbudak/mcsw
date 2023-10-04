@@ -239,6 +239,11 @@ class PopUpForm {
                 for(let key in this.form_schema[i]['eventListener'])
                     element.addEventListener(key, this.form_schema[i]['eventListener'][key]);
             }
+            element.addEventListener('keyup', (event)=>{
+                if(event.key === 'Enter' || event.keyCode === 13) {
+                    this.confirm();
+                }
+            });
             // APPEND
             form_container.appendChild(label);
             form_container.appendChild(element);

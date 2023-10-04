@@ -15,7 +15,6 @@ function stopServer(id){
             'Accept': 'application/json'
         }).then(async (response)=>{
             response = await response.json();
-            console.log(response);
             if(response.error == null){
                 new Message('success', response.message);
 
@@ -47,7 +46,6 @@ function startServer(slot_id, server_id){
             'Accept': 'application/json'
         }).then(async (response)=>{
             response = await response.json();
-            console.log(response);
             if(response.error == null){
                 new Message('success', response.message);
 
@@ -79,10 +77,8 @@ function restartServer(slot_id, server_id){
             'Accept': 'application/json'
         }).then(async (response)=>{
             response = await response.json();
-            console.log(response);
             if(response.error == null){
                 new Message('success', response.message);
-
             }
             else{
                 new Message('error', response.error);

@@ -117,7 +117,7 @@ Users.update = async (name, data) => {
         if(data.email){
             let already_in_use = await Users.getByEmail(data.email);
             if(already_in_use && already_in_use.name != name){
-                throw new Error(`Couldn't change email address: ${data.email} already exists`);
+                throw new Error(`Couldn't change email address: ${data.email} already in use by another user`);
             }
             else{
                 if(data.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) == null){

@@ -186,7 +186,6 @@ Mcsm.getNetworkSlots = async () => {
             });
         }));
     }
-    console.log(found);
     mcsm_responses = await Promise.all(promises);
     for(let i = 0; i < mcsm_responses.length; i++){
         let mcsm_response = mcsm_responses[i];
@@ -214,7 +213,6 @@ function connect(host, payload, callback){
     client.on('end', () => {
         try{
             response = JSON.parse(response);
-            console.log(response);
             if(callback){
                 callback(response.error, response.data, response.message);
             }
@@ -232,7 +230,6 @@ function connect(host, payload, callback){
     });
     client.setTimeout(1500, () => {
         client.destroy();
-        console.log(callback);
         callback("Timeout", null);
     });
 }

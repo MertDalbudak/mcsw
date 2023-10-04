@@ -25,7 +25,6 @@ router.get('/my-server', async function(req, res) {
     let slot_data = [];
     try{
         slot_data = await Mcsm.getNetworkSlots()
-        console.log(slot_data);
     }
     catch(error){
         pushLog(error, "MCSM");

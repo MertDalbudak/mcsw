@@ -6,8 +6,6 @@ router.get('/', async function(req, res) {
     let slots = null;
     try{
         slots = await Mcsm.getNetworkSlots();
-        console.log(slots);
-        console.log(slots[0].server.players);
     }
     catch(error){
         pushLog(error, "MC Serve Query");

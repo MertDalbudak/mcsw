@@ -108,7 +108,6 @@ module.exports = function (Store) {
                     else{
                         callback(null, null);
                     }
-                    console.log(session);
                     sessions[session_index] = session;
                     fs.writeFileSync(ROOT + '/data/session.json', JSON.stringify(sessions), {'encoding': 'utf-8'});
                     callback(null);
