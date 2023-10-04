@@ -8,7 +8,7 @@
     <li>Access to all minecraft server</li>
 </ul>
 
-<form action="/profile/delete" method="post">
+<form action="/profile/delete" method="post" onsubmit="event.preventDefault()">
     <?- csrf(form_security.csrf) ?>
     <label for="deleteProfilePassword"><?= __('password') ?></label>
     <input id="deleteProfilePassword" type="password" name="password" />

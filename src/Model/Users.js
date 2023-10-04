@@ -115,7 +115,8 @@ Users.update = async (name, data) => {
             }
         }
         if(data.email){
-            if((await Users.getByEmail(data.email)).name != name){
+            let already_in_use = await Users.getByEmail(data.email);
+            if(already_in_use && already_in_use.name != name){
                 throw new Error(`Couldn't change email address: ${data.email} already exists`);
             }
             else{
