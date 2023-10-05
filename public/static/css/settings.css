@@ -56,9 +56,15 @@ li.settings_content_section ul {
     list-style-type: disc;
     margin-left: 20px;
 }
+
 li.settings_content_section ul {
     list-style-type: disc;
     margin-left: 20px;
+}
+
+li.settings_content_section h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 button#settings_show_menu {
@@ -95,6 +101,7 @@ button#settings_show_menu {
     }
 
     div#settings.show_content ul#settings_content {
+        width: 100%;
         display: inline-flex !important;
         padding-left: 45px;
     }
