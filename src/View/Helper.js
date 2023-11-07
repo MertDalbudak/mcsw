@@ -1,5 +1,5 @@
 // PUT ALL YOUR HELPERS HERE
-
+const LanguageDict = require('./LanguageDict');
 
 const Helper = {};
 

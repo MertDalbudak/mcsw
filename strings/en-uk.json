@@ -601,5 +601,5 @@
     "signOut_message": "You have successfully logged out",
     "signOutForce_message": "You have been logged out",
     "signOutNotLatest_message": "You were automatically singed out because there is a more recent session with your account.",
-    "code of conduct": "Code of conduct"
+    "code_of_conduct": "Code of conduct"
 }

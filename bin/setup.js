@@ -8,7 +8,6 @@ const p = require('path');
 const fs = require('fs');
 const crypto = require('crypto')
 const readline = require('readline');
-const { execSync } = require('child_process');
 
 const rl = readline.createInterface({
     input: process.stdin,

@@ -193,6 +193,10 @@ textarea {
     overflow-x: hidden;
 }
 
+.bold {
+    font-weight: bold !important;
+}
+
 @media only screen and (max-width: 980px) {
     .container {
         width: 100% !important;
@@ -862,6 +866,7 @@ ul.pillbox > li.pill-paper{
 
 .addToClipboard::before {
     content: "\2197";
+    position: absolute;
     padding: 0 5px;
     font-size: 1.1em;
     font-weight: 700;

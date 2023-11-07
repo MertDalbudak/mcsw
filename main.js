@@ -379,5 +379,5 @@ app.all('*', (req, res)=>{
 
 /////////////// ROUTER ///////////////
 
-
+app.disable('x-powered-by');
 app.listen(process.env.PORT, () => pushLog('Application running on port ' + process.env.PORT, "Server start"));

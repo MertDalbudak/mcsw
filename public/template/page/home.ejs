@@ -5,7 +5,7 @@
         <img src="/image/zombie3.webp" height="160" alt="Minecraft bee" />
         <h3>Noch kein Konto?</h3>
         <button class="btn" onclick="register_form.show()"><?= __('signUp') ?></button>
-        <h4>Du hast bereits ein Konto?</h4>
+        <h4><?= __('signUp_haveAnAccount') ?></h4>
         <button class="btn" onclick="login_form.show()"><?= __('signIn') ?></button>
     </div>
     <? } ?>
@@ -28,7 +28,7 @@
     <? if(data.slots.length > 0){ ?>
     <?- include('../layout/slots.ejs') ?>
     <? } else { ?>
-    <h2><?= __('No slots data available') ?></h2>
+    <h2><?= __('slots_not_available') ?></h2>
     <? } ?>
-    <p>Bitte lies dir den <a href="/code-of-conduct"><?= __('code of conduct') ?></a> durch, bevor du einem Server beitrittst.</p>
+    <p><?- __('home_read_coc') ?></p>
 </div>
