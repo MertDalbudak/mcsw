@@ -373,7 +373,7 @@ init_router_directory(process.env.ROUTES_PATH);
 // SENT 404 PAGE NOT FOUND
 app.all('*', (req, res)=>{
     res.ejsRender('404.ejs', (err, file) => {
-        res.send(file);
+        res.status(404).send(file);
     });
 });
 
