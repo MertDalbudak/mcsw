@@ -323,11 +323,8 @@ textarea {
         display: none !important;
         height: 0;
         width: 0;
-        margin: 0;
+        margin: 0 auto;
         top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         overflow: hidden !important;
         visibility: hidden !important;
     }
@@ -403,6 +400,7 @@ ul#msg_container li.msg {
     max-width: 980px;
     top: 35px;
     margin: 10px auto;
+    padding: 8px 0;
     display: block;
     overflow: hidden;
     position: relative;
@@ -430,6 +428,7 @@ li.msg.msg_success {
 
 ul#msg_container li.msg div.container {
     display: table;
+    padding: 0 8px;
 }
 
 ul#msg_container li.msg div.container > div {
@@ -474,14 +473,14 @@ ul#msg_container li.msg div.msg_content div.msg_text {
 }
 
 ul#msg_container li.msg div.msg_close {
-    padding: 0 15px 0 10px;
+    padding: 0 8px;
 }
 
 ul#msg_container li.msg div.msg_close button {
     width: 16px;
     height: 16px;
     margin: 0;
-    padding: 0;
+    padding: 8px;
     display: block;
     background-color: transparent;
     background-image: url('/image/symbol/cross_white.svg');
@@ -493,6 +492,12 @@ ul#msg_container li.msg div.msg_close button {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
+    box-sizing: unset;
+    border-radius: 4px;
+}
+
+ul#msg_container li.msg div.msg_close button:hover {
+    background-color: rgba(0, 0, 0, .1);
 }
 
 @media (max-width: 640px) {
