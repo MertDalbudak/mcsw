@@ -6,7 +6,7 @@ SERVER_PATH="$(dirname "$0")"
 
 if ! screen -list | grep -q $SCREEN_NAME; then
     echo "Starting Minecraft Server Manager";
-    screen -dmS $SCREEN_NAME bash -c "cd ${SERVER_PATH} && npm start"
+    screen -dmS $SCREEN_NAME bash -c "cd ${SERVER_PATH}/../ && npm start"
     screen -S $SCREEN_NAME -X multiuser on
     screen -S $SCREEN_NAME -X acladd root,${whoami}
     echo "successful";
