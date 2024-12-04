@@ -20,7 +20,7 @@
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.5",
     "crypto": "^1.0.1",
-    "csurf": "^1.11.0",
+    "csurf": "^1.2.2",
     "dotenv": "^8.6.0",
     "ejs": "^3.1.5",
     "evilscan": "^1.9.1",
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "jest": "^26.6.3",
+    "jest": "^29.7.0",
     "supertest": "^6.0.1"
   },
   "jest": {
