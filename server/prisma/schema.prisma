@@ -1,0 +1,191 @@
+// mcsw schema — SQLite + Prisma 7 (driver adapter mode).
+//
+// In Prisma 7 the datasource URL lives in `prisma.config.ts` (loaded via
+// the better-sqlite3 driver adapter). SQLite has limited enum support, so
+// enum-like fields are stored as TEXT and validated at the API boundary
+// with Zod.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Identity ────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerifiedAt DateTime?
+  passwordHash    String
+  isAdmin         Boolean   @default(false)
+  isDisabled      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastLoginAt     DateTime?
+
+  mojangAccount      MojangAccount?
+  invitationsCreated Invitation[]   @relation("InvitationsCreated")
+  invitationConsumed Invitation?    @relation("InvitationConsumed")
+  serverGrants       ServerGrant[]
+  emailTokens        EmailToken[]
+  passwordResets     PasswordReset[]
+  auditEntries       AuditLog[]     @relation("AuditActor")
+
+  @@map("users")
+}
+
+model MojangAccount {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Mojang UUID, stored without dashes (32 hex chars) for stable lookups.
+  uuid       String    @unique
+  username   String // current Mojang username at link time
+  linkedAt   DateTime  @default(now())
+  verifiedAt DateTime?
+
+  @@map("mojang_accounts")
+}
+
+// ─── Invitations ─────────────────────────────────────────────────────────
+
+model Invitation {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  createdById  String
+  createdBy    User      @relation("InvitationsCreated", fields: [createdById], references: [id])
+  consumedById String?   @unique
+  consumedBy   User?     @relation("InvitationConsumed", fields: [consumedById], references: [id])
+  consumedAt   DateTime?
+  expiresAt    DateTime?
+  note         String?
+  createdAt    DateTime  @default(now())
+
+  @@map("invitations")
+}
+
+// ─── Sessions ────────────────────────────────────────────────────────────
+
+model Session {
+  sid       String   @id
+  data      String // JSON
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ─── Email / password tokens ─────────────────────────────────────────────
+
+model EmailToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // sha256 of the random token; the plaintext is sent in the email link.
+  tokenHash  String    @unique
+  // "verify_email" | "change_email"
+  purpose    String
+  // For change_email: the pending new address (if any).
+  payload    String?
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@map("email_tokens")
+}
+
+model PasswordReset {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+// ─── mcsm fleet ──────────────────────────────────────────────────────────
+
+model McsmInstance {
+  id         String   @id @default(cuid())
+  // Stable human label (also used as the instance key against mcsm).
+  name       String   @unique
+  baseUrl    String
+  authToken  String
+  // First peer to ask for federation queries.
+  isPrimary  Boolean  @default(false)
+  enabled    Boolean  @default(true)
+  // "manual" | "discovered"
+  source     String   @default("manual")
+  notes      String?
+  // Last time we successfully reached this peer.
+  lastSeenAt DateTime?
+  // Last error string from a probe (if any).
+  lastError  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  serverGrants ServerGrant[]
+
+  @@map("mcsm_instances")
+}
+
+// ─── Per-server grants ───────────────────────────────────────────────────
+//
+// mcsw doesn't store the catalog of mc servers — that lives in mcsm.
+// We store *who can do what to which mcsm-server-id*.
+
+model ServerGrant {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mcsmInstanceId String
+  mcsmInstance   McsmInstance @relation(fields: [mcsmInstanceId], references: [id], onDelete: Cascade)
+  // mcsm server UUIDv7. Stable across restarts of the mcsm daemon.
+  serverId       String
+
+  canStart    Boolean @default(false)
+  canStop     Boolean @default(false)
+  canRestart  Boolean @default(false)
+  canCommand  Boolean @default(false)
+  canModerate Boolean @default(false)
+  canAdmin    Boolean @default(false)
+  canInvite   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, mcsmInstanceId, serverId])
+  @@index([mcsmInstanceId, serverId])
+  @@map("server_grants")
+}
+
+// ─── Audit log ───────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  ts          DateTime @default(now())
+  actorUserId String?
+  actor       User?    @relation("AuditActor", fields: [actorUserId], references: [id])
+  // Dotted action name, e.g. "auth.signin", "slot.start", "invite.create".
+  action      String
+  // JSON-encoded subject (e.g. {"slot":"creative","server_id":"..."}).
+  target      String?
+  // "ok" | "error"
+  result      String
+  errorCode   String?
+  ip          String?
+  userAgent   String?
+
+  @@index([ts])
+  @@index([actorUserId, ts])
+  @@map("audit_log")
+}

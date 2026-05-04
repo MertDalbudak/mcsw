@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+/* Mobile-first base. The dark slate palette is chosen for the Minecraft
+   admin look; everything else is plain Tailwind utilities. */
+
+:root {
+  color-scheme: dark;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body, #app { height: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+
+/* Tap targets stay ≥44px on touch devices (Apple guideline). */
+@media (hover: none) {
+  button, [role="button"] { min-height: 44px; }
+}
+
+/* Scrollbar styling — subtle, dark theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.slate.700') transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: theme('colors.slate.700'); border-radius: 9999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Animation: state pulse for "starting" / "stopping". */
+@keyframes mcsw-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.mcsw-pulse { animation: mcsw-pulse 1.4s ease-in-out infinite; }

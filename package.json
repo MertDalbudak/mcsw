@@ -1,47 +1,40 @@
 {
   "name": "mcsw",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "start": "node main.js",
-    "test": "jest --detectOpenHandles --forceExit"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MertDalbudak/mcsw"
-  },
-  "author": "Mert Dalbudak",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Minecraft Server Web Manager — web UI for the mcsm daemon",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MertDalbudak/mcsw/issues"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.0",
-    "cookie-parser": "^1.4.5",
-    "crypto": "^1.0.1",
-    "csurf": "^1.2.2",
-    "dotenv": "^8.6.0",
-    "ejs": "^3.1.5",
-    "evilscan": "^1.9.1",
-    "express": "^4.17.1",
-    "express-fileupload": "^1.2.0",
-    "express-session": "^1.17.1",
-    "mariadb": "^2.5.1",
-    "minecraft-server-util": "^5.4.0",
-    "moment": "^2.29.1",
-    "nodemailer": "^6.6.1",
-    "oauth": "^0.9.15"
+  "author": "Mert Dalbudak",
+  "type": "module",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:server": "npm run dev --workspace server",
+    "dev:web": "npm run dev --workspace web",
+    "build": "npm run build --workspace server && npm run build --workspace web",
+    "start": "npm run start --workspace server",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "prisma:generate": "npm run prisma:generate --workspace server",
+    "prisma:migrate": "npm run prisma:migrate --workspace server",
+    "prisma:deploy": "npm run prisma:deploy --workspace server",
+    "prisma:studio": "npm run prisma:studio --workspace server",
+    "db:seed": "npm run db:seed --workspace server"
   },
   "devDependencies": {
-    "cross-env": "^7.0.2",
-    "jest": "^29.7.0",
-    "supertest": "^6.0.1"
+    "@types/node": "^24.0.0",
+    "prisma": "^7.8.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.3"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ]
+  "dependencies": {
+    "@prisma/client": "^7.8.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

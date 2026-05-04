@@ -1,7 +1,32 @@
 .DS_Store
 ._*
-/node_modules
+
+# Dependencies
+node_modules/
+.node_modules_old/
+
+# Env / secrets
 .env
-/logs
-/data
-/data/*
+.env.local
+.env.*.local
+
+# Build artefacts
+server/dist/
+web/dist/
+*.tsbuildinfo
+
+# Runtime data
+data/
+logs/
+server/prisma/dev.db
+server/prisma/dev.db-journal
+*.sqlite
+*.sqlite-journal
+
+# Generated Prisma client
+server/src/generated/
+
+# Editor
+.idea/
+.vscode/
+*.swp
